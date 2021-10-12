@@ -1,0 +1,377 @@
+<!--
+ index.html
+
+  Copyright (C) 2011,2012 Stefan Bolus, University of Kiel, Germany
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
+
+<html>
+<head>
+	<title>Simple Games Laboratory</title>
+	<meta name="author" content="Stefan Bolus">
+	<meta name="description" content="Web Application to play around with 
+		Simple Games and Multiple Weighted Voting Games.">
+	<meta name="keywords" content="Simple Game, Weighted Voting Game,
+		Power Index, Banzhaf Index, Shapley-Shubik Index, Public Good Index,
+		Deegan-Packel Index, Holler-Packel Index, Swap Robust,
+		Homogeneous Simple Game, Complete Simple Game, Vector-weighted Voting
+		Game, Web Application, QOBDD, Binary Decision Diagram, Quasi-reduced
+		Binary Decision Diagram, Linear Program"></meta>
+	
+	<link rel="stylesheet" href="css/main.css" type="text/css"></link>
+	
+	<script type="text/javascript" src="js/Config.js"></script>
+	<script type="text/javascript" src="js/Helper.js"></script>
+	<script type="text/javascript">
+    	IncludeJavaScript (Config.closure_library_path + '/closure/goog/base.js');
+    </script>
+    <script type="text/javascript">
+        goog.require('goog.userAgent');
+    </script>  
+	
+	<script type="text/javascript">
+		function openLab () {
+			var width = Math.min(1400,screen.width), height = screen.height;
+			var left = parseInt((screen.width - width) / 2.0);
+			
+			window.open('lab.html', 'Simple Game Lab', "width="+width+",height="+height+","
+					+'top=0,left='+left+','
+					+'resizable=yes,menubar=no,location=no,dependent=no,status=no,scrollbars=yes');
+		}
+		
+		function isCompatibleJSEngine () {
+			if (goog.userAgent.GECKO) {
+				return parseInt(goog.userAgent.VERSION) >= 2;
+			}
+			else if (goog.userAgent.IE) {
+				// Canvas is not supported prior to version 9.0.
+				// See http://en.wikipedia.org/wiki/Canvas_element for details.
+				return parseInt(goog.userAgent.VERSION) >= 9;
+			}
+			else if (goog.userAgent.OPERA) {
+				return parseInt(goog.userAgent.VERSION) >= 9;
+			}
+			else {
+				return true;
+			}
+		}
+	</script>
+	
+	<style type="text/css">
+		p.news { margin-left: 30px; }
+	</style>
+</head>
+<body>
+	<div id="JSEngineWarning" style="display: none; color: red; font-weight: bold; text-align: center; margin-bottom:30px;">
+		<div style="width:600px; width: 50%; margin: 0px auto;">
+		WARNING: Your browser is maybe too old to use all features of this software. Please update your browser!
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		if (!isCompatibleJSEngine ()) {
+			document.getElementById("JSEngineWarning").style.display = "block";
+		}
+	</script>
+	<table width="100%" height="100%">
+		<tr valign="middle">
+			<td align="center">
+				<div style="padding-bottom:50px; font-size:87%">
+					<span><a href="http://www.informatik.uni-kiel.de/~stb" target="_blank">Contact the Author</a></span>
+				</div>
+						
+				<a href="javascript:openLab()"><img src="images/lab.png" alt="Simple Game Lab" border="0" style="margin-bottom:50px;"/></a>
+				
+				
+				<div style="margin: 0 0 10px 0; text-align:center;">
+					<a href="#TOCNews">News</a> | <a href="#TOCFeatures">Features</a> | <a href="#TOCDocumentation">Documentation</a>
+					 | <a href="#TOCEmbedding">Embedding</a>
+					 | <a href="#TOCContribute">Contribute</a> | <a href="#TOCDownload">Download</a>
+					 | <a href="#TOCAcknowledgements">Acknowledgements</a> | <a href="#TOCLicense">License</a> 
+				</div>
+				<div style="width:700px; text-align:justify">
+				<hr/>
+				
+					<p>
+					Welcome to the <i>Simple Game Laboratory</i>, a playground for 
+					<i><a class="external" href="http://en.wikipedia.org/wiki/Glossary_of_game_theory#Simple_game" target="_blank">Simple Games</a></i> 
+					and <i>Multiple Weighted Voting Games</i> in particular. The aim of this project is to solve some problems and answer
+					questions which naturally arise when working with simple games.
+					</p>
+				
+					<div style="text-align:center">
+						<div style="margin-bottom: 5px;"><big style="font-size: 150%;"><strong><a href="javascript:openLab()">Enter</a></strong></big></div>
+						<div>or</div>
+						<div style="margin-bottom: 5px"><a href="lab.html">Open in this window</a></div>
+						<small>(May take a few seconds to load; "Enter" opens the lab in a new window)</small>
+					</div>
+				
+					<p>
+					As a web application entirely written in 
+					<a href="http://en.wikipedia.org/wiki/Javascript" class="external" target="_blank">JavaScript</a> 
+					the laboratory works out of the box without any additional 
+					software except a modern web browser like 
+					<a href="http://www.firefox.com" class="external" target="_blank">Mozilla's Firefox</a> or
+					<a href="http://www.google.com/chrome/" class="external" target="_blank">Google's Chrome</a>.
+					</p>
+					
+					<a name="TOCNews"></a>
+					<h2>News</h2>
+					<p class="news">
+					<ul>
+						<li><i>March 2012:</i> Released version 2.1 of the library. Changes include:
+						<div style="text-align: left">
+						<ul>
+							<li>Additional example for the <a href="http://en.wikipedia.org/wiki/US_Congress" class="external" target="_blank">US Federal Legal System</a>.</li>
+							<li>Added input of Boolean vectors.</li>
+							<li>Improved computation of shift-minimal winning and shift-maximal losing coalitions/models.</li>
+							<li>Improved support for random games.</li>
+							<li>Improved counting and enumeration of models.</li>
+							<li>Added benchmark script. <span style="font-size: 87%;">See <tt>embed/examples/benchmark/</tt>.</span></li>
+							<li>Fixed bugs. <span style="font-size: 87%;">In some rare cases the QOBDDs for the shift-minimal winning and shift-maximal losing coalitions are incorrect in the previous version(s).</span></li>
+						</ul>
+						</div>
+						</li>
+						<li style="margin-top:5px;"><i>Sept. 2011:</i> Released version 2 of the library.</li>
+					</ul>
+					</p>
+					
+					<a name="TOCFeatures"></a>
+					<h2>Features</h2>
+					<p>
+					Given any number of weighted voting games, the laboratory
+					can handle any simple games built from them using conjunction
+					and disjunction. That includes multiple weighted voting
+					games.
+					</p>
+					
+					<p>
+					Features include but are not limited to:
+					<ul>
+						<li>Efficient representation of simple games by using 
+							quasi-reduced binary decision diagrams (QOBDDs).</li>
+						<li>Load simple games from (multiple) weighted voting games,
+							lists of minimal winning coalitions and Boolean expressions.</li>
+						<li>Count and list the (models of) the winning, minimal winning, shift-minimal
+							winning coalitions, the blocking coalitions (dual game) and the losing, 
+							maximal losing and shift-maximal losing coalitions.</li> 
+						<li>Perform tests if a game is complete/swap-robust (with counterexample if not), 
+							directed, consecutive and determine its symmetry classes (types).</li>
+						<li>Test if a game is homogeneous.</li>
+						<li>Perform tests if a game is strong, proper and decisive, respectively.</li>
+						<li>Partial test if a game is weighted (with counterexample if not).</li>
+						<li>Determination of dummy and veto players and test for dictatorship.</li>
+						<li>Computation of Banzhaf, Shapley-Shubik, Holler-Packel, Deegan-Packel and Shift-Power index.</li>
+						<li>Test of being a weighted voting game. Export of the corresponding linear program.</li>
+						<li>Improved embedding of the library into external projects. See <a href="#TOCEmbedding">Embedding</a>.</li>
+					</ul>
+					Definitions for the terms are given in the <a href="help.html" target="_blank">help</a> <span style="font-size: small;">(opens in new window)</span>.
+					</p>
+					
+					<a name="TOCDocumentation"></a>
+					<h2>Documentation</h2>
+					
+					<p>
+					There is little documentation on the terms used in the laboratory. See <a href="help.html" target="_blank">here</a>
+					<span style="font-size: small;">(opens in new window)</span>.
+					</p>
+					
+					<p>
+					There is currently no source code documentation available. However,
+					important parts of the source code are documented well. A good
+					starting point is the file <tt><a href="js/core/SimpleGame.js">js/core/SimpleGame.js</a></tt>
+					and the constructor <tt>SimpleGame</tt>.
+					</p>
+					
+					<a name="TOCEmbedding"></a>
+					<h2>Embedding into external Projects</h2>
+					
+					<p>
+					It it sometimes convenient to use the functionality of the laboratory
+					without a web browser from the command line or in an external program, for instance, on a web server. There are both libraries
+					such as <a href="https://developer.mozilla.org/En/SpiderMonkey" class="external">Mozilla SpiderMonkey</a> 
+					and <a href="http://code.google.com/p/v8/" class="external">Google v8</a> which can be used to embed JavaScript into
+					other programming languages such as C or C++ as well as JavaScript
+					interpreters or shells such as the 
+					<a href="https://developer.mozilla.org/En/SpiderMonkey/Introduction_to_the_JavaScript_shell" class="external">JavaScript shell</a> which is shipped
+					with Mozilla SpiderMonkey.
+					</p>
+					
+					<p>
+					At this point we will give a short example how the latter shell
+					can be used to load the laboratory and do tasks. We assume you
+					have already installed the JavaScript shell as <tt>js</tt> on your system.
+					The laboratory comes with a dedicated file <tt>embed/lab.js</tt> which
+					can be used here. The file contains a singleton called <tt>Lab</tt>
+					which has a <tt>init</tt> method which has to be called to load the
+					library. The <tt>init</tt> function will load any files necessary
+					(including external libraries such as <tt>closure</tt> and
+					<tt>jshashtable</tt>). The arguments to <tt>init</tt> are the directories
+					of the libraries and an optional load function that has to be used
+					to load the <tt>.js</tt> files. By default the global function <tt>load</tt>
+					is used which is provided by some JavaScript shells. For example, the library can be
+					initialized using the lines:
+					<pre class="code">
+var src_dir = "/home/stb/workspace/lab";
+Lab.init(src_dir, src_dir, src_dir);
+					</pre>
+					To read a file, SpiderMonkey' shell provides a function <tt>read(filename)</tt>.
+					The following code loads a game from a file and writes the models of its 
+					shift-minimal winning coalitions to the standard output. The format is the same as
+					in the online version.
+					<pre class="code">
+try {
+	var gameStr = read (&lt;your-file.game&gt;);
+	
+	// Parse and load the game. The returned object is of type SimpleGame.
+	var game = parse_mwvg (gameStr);
+	
+	// List all models of the shift-minimal winning coalitions.
+	var models = game.getShiftMinWinModels ();
+	for (var i in models) {
+		print ('(' + models[i] + ')');
+	}
+}
+catch (e) {
+	if (e instanceof ParserException) {
+		print ("Unable to parse game. Reason: " + e);
+	}
+	else {
+		print ("Unknown error. Details: " + e);
+	}
+}
+					</pre>
+					From the command line, use:
+					<pre class="shell">
+$ js -f /home/stb/workspace/lab/embed/lab.js -f &lt;your-file.js&gt;
+					</pre>
+					Two rules of thumb for SpiderMonkey. 1. If SpiderMonkey says "out of memory",
+					the internal <a href="https://developer.mozilla.org/en/SpiderMonkey/JSAPI_Reference/JS_NewRuntime" class="external">runtime</a> 
+					created by the shell is too small (160 MiB by default).
+					Unfortunately, this value cannot be changed dynamically such that the shell
+					has to be <a href="https://developer.mozilla.org/En/SpiderMonkey/Build_Documentation" class="external">recompiled</a> 
+					in order to change it. E.g., you could include <tt>limits.h</tt>
+					and pass <tt>UINT_MAX</tt> to <tt>JS_NewRuntime</tt>. 2. It usually is <b>much</b>
+					faster to enable the optimizations offered by the JavaScript shell. See for details:
+					<pre class="shell">
+$ js --help
+					</pre>
+					</p>
+					
+					
+					<a name="TOCContribute"></a>
+					<h2>Contribute</h2>
+					<p>
+					There are some ways to contribute to this project:
+					<ul>
+						<li>Send a bug report.</li>
+						<li>Request a feature.</li>
+						<li>Contribute new features.</li>
+					</ul>
+					Any support is very much appreciated. Contact the author for details.
+					</p>
+					
+					<a name="TOCDownload"></a>
+					<h2>Download the Source Code</h2>
+					
+					<p>
+					Even though this software is written in Java Script, the files 
+					available online may be compressed and/or compiled using, for instance,
+					the <a href="http://code.google.com/closure/compiler/" class="external" target="_blank">Closure Compiler</a>, 
+					so that they are hard to read and understand for humans. 
+					</p>
+					
+					<p>
+					The following archive(s) contain all source files necessary to run the 
+					laboratory on your computer, <strong>except</strong> third-party libraries. 
+					</p>
+					
+					<center>
+						<table width="80%" border="0" cellpadding="3" cellspacing="1" style="margin-bottom:5px;">
+							<tr><th>Filename</th><th>Date</th><th>Size</th></tr>
+							<tr><td><tt><a href="releases/simple_games_lab-2.1.tar.bz2">simple_games_lab-2.1.tar.bz2</a></tt></td>
+								<td>08/03/2012</td><td>146 KiB</td></tr>
+							<tr><td><tt><a href="releases/simple_games_lab-2.0.tar.bz2">simple_games_lab-2.0.tar.bz2</a></tt></td>
+								<td>14/09/2011</td><td>139 KiB</td></tr>
+							<tr><td><tt><a href="releases/simple_games_lab-1.0.tar.bz2">simple_games_lab-1.0.tar.bz2</a></tt></td>
+								<td>25/03/2011</td><td>124.5 KiB</td></tr>
+						</table>
+					</center>
+					
+					In order to get the laboratory working, extract the archive somewhere,
+					say in <tt>/home/your_name/</tt>. On Windows it would be something like 
+					<tt>C:\Users\YourName\</tt>. The archive contains a directory named
+					<tt>simple_games_lab-&lt;version&gt;</tt> where <tt>&lt;version&gt;</tt> is the
+					laboratory's version, for instance, <tt>1.0</tt>. Now perform the following steps:
+					
+					<ul>
+						<li>Change working directory to <tt>simple_games_lab-&lt;version&gt;/</tt>.</li>
+						<li>Checkout the latest version of the 
+							<a href="http://code.google.com/closure/library/" class="external" target="_blank">Closure Library</a> 
+							using <a href="http://subversion.tigris.org/" class="external" target="_blank">Subversion</a>: >
+							<div style="text-align: center; margin: 5px 0 5px 0;">
+								<tt>svn checkout http://closure-library.googlecode.com/svn/trunk/ closure-library</tt>
+							</div>
+						</li>
+						<li>Download a recent version of <a href="http://www.rgraph.net/" class="external" target="_blank">RGraph</a>
+							and extract it into the current working directory. This should create a directory
+							named <tt>RGraph/</tt>.
+						</li>
+					</ul> 
+					
+					That's it. Now open the file
+					
+					<div style="text-align: center; margin: 5px 0 5px 0;">
+						<tt>file:///home/your_name/simple_games_lab-&lt;version&gt;/index.html</tt>
+					</div>
+					in your web browser.
+					
+					
+					<a name="TOCAcknowledgements"></a>
+					<h2>Acknowledgements</h2>
+					
+					<p>
+					This project is supported by the <a href="http://www.dfg.de/" class="external" target="_blank">German Research Foundation</a> (Grant BE 4206/1-1)
+					and it is part of <a href="http://www.esf.org/activities/eurocores/running-programmes/logiccc/projects/list-of-projects.html#c33931" class="external" target="_blank">SSEAC</a>.
+					</p>
+
+					<p>					
+					We would also thank the authors of the following third-party libraries which are used:
+					<ul>
+						<li>Closure Library: <a href="http://code.google.com/closure/library/" class="external" target="_blank">http://code.google.com/closure/library/</a>.</li>
+						<li>Hash Table Implementation: <a href="http://www.timdown.co.uk/jshashtable/" class="external" target="_blank">http://www.timdown.co.uk/jshashtable/</a></li>
+						<li>Parser Generator: <a href="http://pegjs.majda.cz/" class="external" target="_blank">http://pegjs.majda.cz/</a>.</li>
+						<li>Graph Library: <a href="http://www.rgraph.net" class="external" target="_blank">http://www.rgraph.net/</a></li>
+						<li>Visualization of Lattices: <a href="http://estrada.cune.edu/facweb/john.snow/drawlat.html" class="external" target="_blank">http://estrada.cune.edu/facweb/john.snow/drawlat.html</a></li>
+						<li>Server-side JavaScript Engine: <a href="https://developer.mozilla.org/en/SpiderMonkey" class="external" target="_blank">SpiderMonkey</a></li>
+						<li>(I)LP-Solver for the Backend: <a href="http://scip.zib.de/" class="external" target="_blank">SCIP/SoPlex</a></li>
+					</ul>
+					</p>
+					
+					<a name="TOCLicense"></a>
+					<h2>License</h2>
+					<p>
+					This software is licensed under the 
+					<a href="LICENSE.txt">GNU General Public License Version 3</a> or later. Third-party libraries and code may have its own license.
+					</p>
+				</div>
+			</td>
+		</tr>
+	</table>
+	
+	<i>Last Updated: 08/03/2012</i>
+</body>
+</html>

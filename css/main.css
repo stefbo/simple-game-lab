@@ -1,0 +1,119 @@
+body { font-family: sans; }
+
+a:hover { color: blue; }
+a:visited { color: blue; }
+
+pre.code { padding-left: 30px; }
+pre.shell { padding-left: 30px; }
+
+/* External link. */
+a.external { background: url(../images/external-link.png) center right no-repeat; padding: 0 13px 0 0; }
+
+table.power-indices-graphs td {
+	vertical-align: top;
+	padding: 5px;
+	border: 1px #aaa solid;
+	width: 50%;
+}
+
+.power-indices-table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.power-indices-table td,.power-indices-table th {
+	border: 1px solid black;
+	padding: 2px 4px 2px 4px;
+}
+
+.action { padding-right: 1em; font-size: small; }
+.action:link { color: blue; }
+.action:visited { color: blue; }
+.action:hover { color: red; }
+
+.compute {
+	cursor: pointer;
+	cursor: hand;
+	color: blue;
+	text-decoration: underline;
+	//background: url(../images/execute.png) center right no-repeat;
+	padding: 0 25px 0 0;
+}
+
+.computable {
+	display: none;
+}
+
+.modal-dialog { /*width: 430px;*/
+	
+}
+
+/* See http://en.wikipedia.org/wiki/IBM_PC_keyboard */
+.keyboard-key {
+	border: 0.2em outset rgb(206, 203, 199);
+	background: none repeat scroll 0% 0% rgb(240, 236, 232);
+	padding: 0pt 0.4em 0.1em 0.3em;
+	font-size: 0.85em;
+	white-space: nowrap;
+}
+
+.properties td {
+	vertical-align: top;
+}
+
+.properties td:first-child {
+	text-align: right;
+}
+
+.metrics {
+	margin-left: 30px;
+	border-collapse: collapse;
+	font-family: sans;
+	font-size: 87%;
+	border: 1px solid black;
+	border-left: 0;
+	border-right: 0;
+}
+
+.metrics th {
+	width: 60px;
+	font-weight: normal;
+	text-align: center;
+}
+
+.metrics td {
+	padding: 2px 5px 2px 5px;
+	text-align: center;
+}
+
+.metrics tr td:first-child {
+	text-align: right;
+}
+
+.metrics tr:first-child {
+	border-bottom: 1px solid black;
+}
+
+.metrics col:first-child {
+	border-right: 1px solid black;
+}
+
+sup.show {
+	text-size: 10pt;
+}
+
+sup.show a:link {
+	color: blue;
+}
+
+sup.show a:visited {
+	color: blue;
+}
+
+sup.show a:hover {
+	color: red;
+}
+
+.wait {
+	background: url(images/in_progress.jpg) no-repeat center;
+}

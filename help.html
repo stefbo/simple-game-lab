@@ -1,0 +1,359 @@
+<!--
+ help.html
+
+  Copyright (C) 2011 Stefan Bolus, University of Kiel, Germany
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
+<html>
+	<head>
+		<title>Help</title>
+		
+		<link rel="stylesheet" href="css/main.css"></link>
+
+		<style type="text/css">
+			span.def { font-weight: bold; }
+			pre.example { margin-left: 50px; }
+			
+			p { text-align: justify; }
+			p.centered-formula { padding: 10px 0 10px 0; text-align: center; }
+		</style>
+	</head>
+	<body>
+		<h1>Help</h1>
+		<h2>Contents</h2>
+		<ol>
+			<li><a href="#quickstart">Quick Start Guide</a></li>
+			<li><a href="#syntax">Syntax</a>
+				<ol>
+					<li><a href="#syntax_classes">Classes</a></li>
+					<li><a href="#syntax_commands">Commands</a></li>
+					<li><a href="#syntax_examples">Examples</a></li>
+				</ol>
+			</li>
+			<li><a href="#glossary">Glossary</a>
+				<ol>
+					<li><a href="#glossary_simplegames">Simple Games</a></li>
+					<li><a href="#glossary_mwvg">(Multiple) Weighted Voting Games</a></li>
+					<li><a href="#glossary_players">Players</a></li>
+					<li><a href="#glossary_types">Types and Models</a></li>
+					<li><a href="#glossary_properties">Properties</a></li>
+				</ol>
+			</li>
+		</ol>
+		
+		<a name="quickstart"></a><h2>Quick Start Guide</h2>
+		
+		<p>
+		Comments start with a <tt>#</tt> on the line.
+		</p>
+		
+		<p>
+		Suppose players <i>1,..,n</i> and each of them can say "yes" or "no". Each such
+ 		player <i>i</i> is represented by a Boolean variable <i>x<sub>i</sub></i> which 
+ 		can be <i>1</i> ("yes") or <i>0</i> ("no").
+ 		</p>
+
+		<p>
+		Now consider a set of <i>m</i> <i>&ge;</i>-constraints and non-negative integer 
+		coefficients <i>w<sub>i,j</sub></i> 
+		("weights"), where <i>i</i> is the player and <i>j</i> is the constraint:
+		
+			<div style="font-family: serif; margin-left:50px;"><i>
+     			w<sub>1,1</sub>x<sub>i</sub> + ... + w<sub>1,n</sub>x<sub>n</sub> &ge; Q<sub>1</sub><br/>
+    	        <span style="text-align:center">...</span><br/>
+	 			w<sub>m,1</sub>x<sub>1</sub> + ... + w<sub>m,n</sub>x<sub>n</sub> &ge; Q<sub>m</sub>
+			</i></div>
+		</p>
+		
+		<p>
+		One such constraint is called a <a href="#glossary_simplegames">Weighted Voting Game</a> 
+		(WVG) and a	satisfying coalition is called a winning coalition (of players).
+		If a coalition is winning only if is satisfies all <i>m</i> constraints, 
+		then it is called <a href="#glossary_simplegames">Multiple Weights Voting Game</a> (MWVG).
+		</p>
+		
+		<p>
+		To model a MWVG as input for the laboratory the constraints have to be 
+		transposed as shown below.
+		The main advantage of this representation is that we can now add the names 
+		of the players. You should keep in mind that the input is 
+		<strong>player-oriented</strong>:
+		
+		<div style="margin:0px 0 5px 50px;">
+			<tt>
+			Q<sub>1</sub> ... Q<sub>m</sub><br/>
+			w<sub>1,1</sub> ... w<sub>m,1</sub> Name of the 1-st Player<br/>
+			      ...<br/>
+			w<sub>1,n</sub> ... w<sub>m,n</sub> Name of the n-th Player
+			</tt>
+		</div>
+		
+		The weights on a players' line can be separated by any number of 
+		spaces and tabs. The players' name ends at the end of the line.
+		</p>
+		
+		<p>
+		 As an example, consider the following two constraints:
+		 	<div style="font-family: serif; margin-left:50px; margin-bottom: 5px"><i>
+     			1x<sub>1</sub> + 1x<sub>2</sub> + 1x<sub>3</sub> &ge; 2
+     			1x<sub>1</sub> + 2x<sub>2</sub> + 3x<sub>3</sub> &ge; 3<br/>
+     		</i></div>
+     	This can be modeled as:
+     	<pre class="example">
+# Right hand sides:
+2  3
+# Weights and names. Here: A, B, C
+1  3 A
+1  2 B
+1  1 C
+     	</pre>
+		</p>
+		
+		
+		<a name="syntax"></a><h2>Syntax</h2>
+		The input format is made of lines. There are four types of lines: Blanks, comments, commands, quotas and classes.
+		<ul>
+			<li>Blank lines (lines which contain only spaces and tabs) are ignored.</li>
+			<li>A <b>comment line</b> beginning with # is ignored.</li>
+			<li>A <b>command line</b> begins with a %% and has the form <tt>%&lt;name> &lt;value></tt> where <tt>&lt;name</tt> is the command''s name and <tt>&lt;command></tt> is the optional value that is passed to the command. For a list of commands, see below.</li>
+			<li>The <b>quota line</b>, which has to appear before any class line, contains the integer quotas for each constraint. The number of quotas determines the number of constraints.</li>
+			<li>A <b>class line</b> adds a new class of players to the game and sets its weights for the constraints. This type of line is discussed in more detail below.
+			</li>
+		</ul>
+		
+		<a name="syntax_classes"></a><h3>Classes</h3>
+		<p>
+		A class line has the form
+		<pre>
+	(x&lt;multiplier>) &lt;weights> (&lt;name>)
+		</pre>
+		where <tt>(...)</tt> indicates an optional part. The multiplier indicates the number of players in the class. For instance, <tt>x5</tt> indicates 5 players. If no multiplier is given, <tt>x1</tt> is assumed.
+		</p>
+		<p>
+		The <tt>&lt;weights></tt> has to provide a non-negative integer weight for each constraint.
+		</p>
+		<p>
+		The <tt>&lt;name></tt> is an optional name for the player. There are no restrictions for its form. The name ends at the end of the line. 
+		</p>
+		
+		
+		<a name="syntax_commands"></a><h3>Commands</h3>
+		<h4><tt>%join &lt;bool expr></tt></h4>
+		
+		<p>
+		The <tt>join</tt> command provides a Boolean expression which describes 
+		how to join the constraints. The variables are the <i>m</i> constraints 
+		numbered from <i>1</i> to <i>m</i>. Boolean operations are 
+		<tt>AND</tt> and <tt>OR</tt>. Negation is not allowed. The parser 
+		respects precedence of conjunction over disjunction and recognizes  
+		brackets.
+		</p>
+		
+		<p>
+		Multiple occurrences of a variable are allowed. See also the example of
+		the US Federal Legal System below. 
+		</p>
+				
+		<a name="syntax_examples"></a><h3>Examples</h3>
+		The prominent <a href="http://en.wikipedia.org/wiki/United_Nations_Security_Council" target="_blank" class="external">UN Security Council</a> contains five permanent players each of which has veto power and it contains ten non-permanent players. For a resolution to pass, nine members have to vote in favor for it. This situation if often modeled as binary game with only "yes" and "no" votes. A weighted representation is <tt>[39;7,7,7,7,7,1,1,1,1,1,1,1,1,1,1]</tt>. If we do not care on the members names, we can model it as:
+		<pre class="example">
+# UN Security Council - First version
+     39
+ x5   7 Permanent Member
+x10   1 Non-permanent Member
+		</pre>
+		If we do care on the names of the permanent members we could model:
+		<pre class="example">
+# UN Security Council - Second version
+     39
+      7 United States
+      7 Russia
+      7 China
+      7 France
+      7 United Kingdom
+x10   1 Non-permanent Member
+		</pre>
+		Even though the weighted representation is well known for this game, the fact that we express two different rules (veto power and "9 out of 15") in a single constraint it not optimal. For example, consider the following model which uses two constraints:
+		<pre class="example">
+# UN Security Council - Third version
+      5  9
+ x5   1  1 Permanent Member
+x10   0  1 Non-permanent Member
+		</pre>
+		This model is much more obvious in that the first constraint models veto power of the permanent members and the second models the "9 out of 15" rule.  
+		
+		<p>
+		We now consider a more complicated example, viz. the <b>US Federal Legal System</b>. 
+		The players are the 100 <b>members of the senate</b>, the 435 <b>members of the house of representatives</b>, 
+		the <b>president of the United States</b> and the <b>vice president of the United States</b> which is 
+		the president of the senate.
+		
+		A bill passes if at least one of the following conditions is satisfied:
+		<ul>
+			<li>51 senators and 218 representatives vote in favor and the president does not veto the bill.</li>
+			<li>50 senators, the vice president and 218 representatives vote in favor and the president does no veto it.</li>
+			<li>67 senators and 290 representatives approve the bill.</li>
+		</ul>
+		As the president of the senate, the vice president acts as a tie-breaker if the senators are equally divided. He 
+		does not have a 
+		<a href="http://en.wikipedia.org/wiki/List_of_tie-breaking_votes_cast_by_Vice_Presidents_of_the_United_States" class="external">regular 
+		vote</a>.
+		
+		The game can be modeled using seven simple rules:
+		<ol>
+			<li>The president approves.</li>
+			<li>At least 51 senators approve.</li>
+			<li>At least 218 representatives approve.</li>
+			<li>The vice president approves.</li>
+			<li>At least 50 senators approve.</li>
+			<li>At least 67 senators approve.</li>
+			<li>At least 290 representatives approve.</li>
+		</ol>
+		
+		From the description of the game above, a bill passes if
+		<ul>
+			<li>the rules 1, 2 and 3 are fulfilled, or</li>
+			<li>the rules 1, 4, 5 and 3 are fulfilled, or</li>
+			<li>the rules 6, 7 are fulfilled.</li>
+		</ul>
+		
+		Straight from that we can derive the model of our game. The <tt>join</tt> command in the first line relates 
+		the single rules as stated above.
+		<pre class="example">
+%join (1 AND 2 AND 3) OR (1 AND 4 AND 5 AND 3) OR (6 AND 7)
+     1  51 218  1  50  67  290
+x100 0   1   0  0   1   1    0 Member of the Senate
+x435 0   0   1  0   0   0    1 Member of the House of Rep.
+     1   0   0  0   0   0    0 President
+     0   0   0  1   0   0    0 Vice-President
+  		</pre>
+  		</p>
+		
+	<a name="glossary"></a>
+	<h2>Glossary</h2>
+		
+	<a name="glossary_simplegames"></a>
+	<h3>Simple Game</h3>
+		
+	Let <i>n &ge; 1</i> and <i>N={1,&hellip;,n}</i> and <i>W &sube; 2<sup>N</sup></i>. The pair 
+	<i>(N,W)</i> is called a <span class="def">simple game</span> if
+	<ol>
+		<li><i>&empty; &notin; W</i>,</li>
+		<li><i>N &isin; W</i> (not-empty) and</li>
+		<li><i>&forall; S,T &isin; 2<sup>N</sup>, S &sube; T: S &isin; W &rArr; T &isin; W</i> (up-set)</li>
+	</ol>
+	
+	The elements in <i>N</i> are called <span class="def">players</span>. Subsets of <i>2<sup>N</sup></i> are called 
+	<span class="def">coalitions</span>. A coalition <i>S</i> is called <span class="def">winning</span> if 
+	<i>S &isin; W</i> and it is called <span class="def">losing</span> otherwise. A coalition <i>S &isin; W</i> 
+	is called <span class="def">minimal winning</span> if each proper subset is losing. The set of minimal 
+	winning coalition is denoted by <i>W<sub>min</sub></i>. A coalition <i>S</i> is <span class="def">blocking</span> 
+	if <i>N \ S</i> is losing.
+	
+	In the remainder, let <i>(N,W)</i> be a simple game.
+	
+	<a name="glossary_mwvg"></a>
+	<h3>(Multiple) Weighted Voting Games</h3>
+	
+	Let <i>Q &ge; 1</i> and <i>w<sub>1</sub>,&hellip;,w<sub>n</sub>&ge; 0</i> be integers. We call 
+	<i>[Q;w<sub>1</sub>,&hellip;,w<sub>n</sub>]</i> a <span class="def">weighted representation (of 
+	<i>(N,W)</i>)</span> if
+	
+	<p class="centered-formula">
+		<i>&forall; S &isin; 2<sup>N</sup>: &sum;<sub>i &isin; S</sub> w<sub>i</sub> &ge; Q &hArr; S &isin; W</i>.
+	</p>
+	
+	In this case, the <i>Q</i> is called the <span class="def">quota</span> and 
+	<i>w<sub>1</sub>,&hellip;,w<sub>i</sub></i> are called the <span class="def">weights 
+	(of the players)</span>. For <i>S&isin; 2<sup>N</sup></i> we define <i>w(S):=&sum;<sub>i&isin; S</sub> 
+	w<sub>i</sub></i>.
+	
+	A weighted representation <i>[Q;w<sub>1</sub>,&hellip;,w<sub>n</sub>]</i> is called <span class="def">homogeneous</span> 
+	if for each minimal winning coalition <i>S</i> it holds <i>w(S)=Q</i>. For instance, <i>[8;6,4,3,1]</i> and 
+	<i>[5;3,2,2,1]</i> represent the same game, the former representation is not homogeneous while the 
+	latter is homogeneous.
+	
+	When we use vectors instead of scalar integers for the weights and for the quota we end up at 
+	<span class="def">multiple weighted voting games</span> <small>(Also known as 
+	<span class="def">vector-weighted voting games</span>)</small>. Operations like <i>+</i> and <i>&ge;</i> are 
+	defined	component-wise for this. For instance, the game <i>[(2,3);(1,2),(2,1),(0,2),(1,1)]</i> is not weighted.
+	
+	<a name="glossary_players"></a>
+	<h3>Players</h3>
+	
+	The preorder <i>&#8829;<sub>I</sub>&sube; N<sup>2</sup></i> is called the 
+	<span class="def">at-least-as-desirable relation (on individuals)</span> and compares players with respect 
+	to their abilities. Given any two players <i>i,j&isin; N</i> the relation is defined by
+	
+	<p class="centered-formula">
+		<i>i&#8829;<sub>I</sub> j &hArr; &forall; S &sube; N\ {i,j}: S &cup; {j} &isin; W &rArr; S &cup; {i} &isin; W</i>
+	</p>
+	
+	Two players <i>i,j &isin; N</i> are called <span class="def">symmetric</span> (denoted by <i>i&#8776;<sub>I</sub>j</i>) if <i>i&#8829;<sub>I</sub> j</i> 
+	and <i>j &#8829;<sub>I</sub> i</i>.
+	
+	A player <i>i &isin; N</i> is called ...
+	<ul>
+		<li>... <span class="def">vetoer</span> if <i>&forall; S &isin; W: i &isin; W</i>.</li>
+		<li>... <span class="def">dummy</span> if <i>&forall; S &isin; W<sub>min</sub>: i &notin; S</i>.</li>
+		<li>... <span class="def">dictator</span> if <i>W<sub>min</sub>={i}</i>. Same as <i>N \ {i}</i> 
+			are dummies and <i>i</i> is not.</li>
+	</ul>
+	
+	If <i>(N,W)</i> has a homogeneous representation <i>[Q;w<sub>1</sub>,&hellip;,w<sub>n</sub>]</i> a non-dummy 
+	player <i>i</i> is called ...
+	<ul>
+		<li>... <span class="def">sum</span> if 
+		<p class="centered-formula">
+			<i>&exist; S &isin; W<sub>min</sub>, i &isin; S: &exist; T &sube; N \ S: (&forall; j &isin; T: 
+			i &#8829;<sub>I</sub> j) &and; (S \ {i}) &cup; T &isin; W</i>.
+		</p>
+		There is a minimal winning coalition containing <i>i</i> in which <i>i</i> can be replaced by some 
+		not more desirable players such that the resulting coalition is winning again.</li>
+		<li>... <span class="def">step</span> if it is not a sum.</li>
+	</ul>
+	
+	<a name="glossary_types"></a>
+	<h3>Types and Models</h3>
+	
+	The equivalence classes of the players (called <span class="def">types</span>) of a simple game <i>(N,W)</i> w.r.t <i>&#8776;<sub>I</sub></i> are denoted 
+	<i>N<sub>1</sub>,...,N<sub>t</sub>&sube; N</i> where <i>t</i> (for <b>t</b>ypes) denotes their number. Let 
+	<i>A&sube; 2<sup>N</sup></i> be a set of coalitions. We call a vector <i>(m<sub>1</sub>,...,m<sub>t</sub>)&isin; &#8469;<sup>t</sup></i>
+	<span class="def">a model of <i>A</i></span> if
+	<p class="centered-formula">
+			<i>&exist; S &isin;A : &forall; k=1,...,t : m<sub>k</sub> = |S &cap; N<sub>k</sub>|</i>.
+	</p>
+	Representions by models are often applied to the sets of the winning, the minimal winning and the
+	shift-minimal winning coalitions. A simlar statement holds for the corresponding sets of the losing
+	coalitions. 
+	
+	<a name="glossary_properties"></a>
+	<h3>Properties</h3>
+	
+	The simple game <i>(N,W)</i> is called ...
+	<ul>
+		<li>... <span class="def">complete</span> if <i>&#8829;<sub>I</sub></i> is total. 
+			<small>Synonyms are <span class="def">total</span> and <span class="def">swap-robust</span>.</small></li>
+		<li>... <span class="def">directed</span> if <i>1&#8829;<sub>I</sub> 2 &#8829;<sub>I</sub> &middot;&middot;&middot; &#8829;<sub>I</sub> n</i>.</li>
+		<li>... <span class="def">consecutive</span> if for each <a href="#glossary_types">type</a> <t>k=1,...,t</t> it holds <i>N<sub>k</sub>={min N<sub>k</sub>,...,max N<sub>k</sub>}</i>. Directed games are always consecutive. Complete games are not.</li>
+		<li>... <span class="def">weighted</span> if it has a weighted representation.</li>
+		<li>... <span class="def">homogeneous</span> if it has a homogeneous weighted representation.</li>
+		<li>... <span class="def">proper</span> if <i>&forall; S &isin; W: N \ S &notin; W</i>.</li>
+		<li>... <span class="def">strong</span> if <i>&forall; S &notin; W: N \ S &notin; W</i>.</li>
+		<li>... <span class="def">decisive</span> if it is proper and strong.</li>
+	</ul>
+	</body>
+</html> 

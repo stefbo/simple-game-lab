@@ -1,0 +1,209 @@
+<!--
+ ui.html
+
+  Copyright (C) 2011,2012 Stefan Bolus, University of Kiel, Germany
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
+
+<html>
+<body>
+	<div id="EnterMinWinCoalsDialog" style="display:none;">
+		<div style="width: 600px;">
+		
+		</div>
+	</div>
+
+	<div id="EnterOtherFormatDialog" style="display: none">
+		<div style="width: 600px;">
+		  <div id="inputTopBar" class="goog-tab-bar goog-tab-bar-top">
+            <div class="goog-tab goog-tab-selected" id="min_win_coals">Min. Win. Coals.</div>
+            <div class="goog-tab" id="bool_expr">Bool. Expr.</div>
+            <div class="goog-tab" id="min_win_coal_vectors">Min. Win. Coal. Vectors</div>
+          </div>
+          <!-- Use goog-tab-bar-clear to separate the tabs from the content. -->
+          <div class="goog-tab-bar-clear"></div>
+			<div id="inputTopBar_content" class="goog-tab-content">
+			<div id="EnterMinWinCoalsTab" style="display: block;">
+					<p>
+						Coalitions are enclosed in <tt>{</tt> and <tt>}</tt>. You can separate coalitions anyway you like, e.g. by a comma and
+						a space. Whitespace characters (i.e. spaces, tabs, linefeeds) are completely ignored.
+					</p>
+					<p>
+						Variables may contain characters
+						<tt>a-z</tt>, <tt>A-Z</tt>, numbers	<tt>0-9</tt> and underscores
+						<tt>_</tt>. For instance,
+						<nobr>
+							<tt>{dog,cat}, {cat,whale} bla bla ... ignored ... {x1, dog}</tt>
+						</nobr>
+					</p>
+					<p>
+						<textarea style="width: 100%" rows="5" id="minWinCoalsInput"></textarea>
+					</p>
+				</div>
+				<div id="EnterBoolExprTab" style="display: none">
+					<p>
+						Available operators are
+						<tt>&amp;</tt>
+						and
+						<tt>|</tt>
+						for &and; and &or;, respectively, and brackets
+						<tt>(...)</tt>
+						. The parser respects precedence of &and; over &or;.
+					</p>
+					<p>
+						The input has to contain a <strong>single</strong> expression which
+						can be split over multiple lines. These are are replaced by spaces
+						before the expression is parsed.
+					</p>
+					<p>
+						Variables may contain characters
+						<tt>a-z</tt>
+						,
+						<tt>A-Z</tt>
+						, numbers
+						<tt>0-9</tt>
+						and underscores
+						<tt>_</tt>
+						. For instance,
+						<nobr>
+							<tt>(dog | cat) & pig</tt>
+						</nobr>
+					</p>
+					<p>
+						<textarea style="width: 100%" rows="5" id="boolExprInput"></textarea>
+					</p>
+				</div>
+				<div id="EnterMinWinCoalVectorsTab" style="display: none;">
+					<p>
+						Accepts a Boolean vector corresponding to a (minimal) winning coalition
+						on each line. If the i-th position in the string is <tt>1</tt> then
+						i-th player is in the corresponding coalition. A <tt>0</tt> means the
+						opposite. Any characters except those just mentioned and newlines are ignored.
+						Multiple newlines (after removal of non-relevant characters) are ignored.
+					</p>
+					<p>
+						For instance, <tt>(1,0,0,1)</tt>, as well as <tt>1001</tt> correspond to
+						the coalition containing player <tt>A</tt> and <tt>D</tt> when names <tt>A,B,C,D</tt>
+						for the players are used. The players in the output are unnamed, though.
+					</p>
+					<p>
+						<textarea style="width: 100%" rows="5" id="minWinCoalVectorsInput"></textarea>
+					</p>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+
+	<div id="EnterRandomGameDialog" style="display:none;">
+		<form onSubmit="return false;" name="RandomGame">
+			#Games: <i>m =</i> <input type="text" size="1" name="m" value="1"/><br/>
+			#Players: <i>n =</i> <input type="" size="3" name="n" value="10"/><br/>
+			<input type="text" value="0" size="3" name="w_i_min"/> <i>&le; w<sub>i</sub> &lt; </i> <input type="text" value="100" size="3" name="w_i_max"/><br/>
+			<i>Q = Math.ceil(</i><input type="text" value="0.5" size="4" name="Q_factor" /> * <i>w(N))</i><br/>
+			<input type="checkbox" name="weights_desc" value="true"> Sort weights descending?
+		</form>
+	</div>
+
+	<div id="FWVGModelServiceDialogContent" style="display:none">
+		<form method="POST" action="http://korsika/~stb/cgi-bin/lab/download.cgi" 
+			onSubmit="this.game.value=document.getElementById('input').value; return verifyFWVGSolverForm(this);">
+		<input type="hidden" name="game" />
+		<input type="checkbox" name="type_preserving" value="true" checked="checked"> Type preserving<br/>
+    	<input type="checkbox" name="weight_preserving" value="true" checked="checked"> Weight preserving<br/>
+			<small style="padding-left:40px">(<i><b>w</b><sup>(j)</sup> &ge; <b>w</b><sup>(i)</sup></i> for <i>j</i> more desirable than <i>j</i>)</small><br/>
+	
+			<p>
+			Formula: <input type="text" name="formula" size="30" value=""></input><br/>
+    			<small style="padding-left:40px">(Example: <tt>(1 OR 2) AND 3</tt>.)</small><br/>
+    		</p>
+    		
+    		<p>
+    		<i style="font-size:small;">(Do not change the following values except you are aware of the consequences.)</i><br/>
+	    	Default min./max. expected <i>quota</i>: <input type="text" size="3" name="min_expected_quota" value="1" /> 
+	    		/ <input type="text" name="max_expected_quota" size="5" value="1000" /><br/>
+	    	Default min./max. expected <i>weight</i>: <input type="text" name="min_expected_weight" size="3" value="0" />
+	    		/ <input type="text" name="max_expected_weight" size="5" value="500" /><br/>
+	    	</p>
+	    	
+	    	<p>
+	    	Encoder for binary Variables: <select name="encoder">
+	    		<option value="simple" selected="selected">Simple</option>
+	    		<option value="inverted">Simple (inverted)</option>
+	    		<option value="dual">Dual encoded</option>
+	    	</select>
+	    	</p>
+	    		    	
+	    	<div style="margin-top: 20px">    	
+				<input type="submit" value="Download"/> as <input type="text" name="filename" value="game" size="15" />
+				<select name="format">
+					<option value="cplex">.lp (CPLEX)</option>
+					<option value="gmpl">.mod (GMPL)</option>
+				</select>
+				<select name="compression">
+					<option value="none"></option>
+					<option value="gz">.gz</option>
+					<option value="bz2">.bz2</option>
+					<option value="lzma">.lzma</option>
+				</select>
+			</div>
+    	</form>
+	</div>
+
+
+
+	<div id="WVGModelServiceDialogContent" style="display:none">
+		<div style="width: 600px">
+			<p>
+				The backend (I)LP solver is <b id="WVGModelService_SolverName"></b>.
+			</p>
+			<p>
+				Use <i>Download</i> to save the (I)LP as a file to you computer in <a
+					href="http://lpsolve.sourceforge.net/5.5/CPLEX-format.htm"
+					class="external">CPLEX file format</a> which is accepted by most
+				(I)LP solvers. Use <i>Solve</i> to solve it directly. To this end,
+				the game\'s textual description on the left is sent to a server and
+				is solved there. Please note that the QOBDD is rebuilt on that
+				computer so that beside the time for the solver that process might
+				cost additional time.
+			</p>
+			<p>Remark: It should usually be faster to minimize the quota.</p>
+			<form method="POST"
+				action="http://korsika.informatik.uni-kiel.de/~stb/cgi-bin/lab/backend.cgi"
+				name="SolverForm">
+				<br /> <input type="checkbox" checked="checked" name="integer"
+					value="true" /> Integer weights?<br /> Objective: <select
+					name="objective">
+					<option value="min_w(N)">Minimize w(N)</option>
+					<option value="min_Q">Minimize Quota</option>
+				</select><br /> <input type="checkbox" checked="checked" name="preserveTypes"
+					value="true" /> Preserve Types<br /> <select name="solver_action"
+					id="SolverAction">
+					<option value="solve" selected="selected">Solve</option>
+					<option value="download">Download</option>
+				</select> <input type="button" value="Submit" onClick="solveGame()" />
+				<div style="display: none; text-align: center; margin-top: 10px;"
+					id="SolverWait">
+					<img src="images/wait.gif" alt="wait">
+				</div>
+				<div
+					style="width: 600px; display: none; font-style: italic; margin-top: 10px;"
+					id="SolverResult"></div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+Feb. 2012:
+	* Split the parser procedure for a multiple weighted voting game into
+	  sub-procedures each of which performs a specific part of the parsing
+	  process. The aim is to allow functionality like reordering and renaming
+	  of players "in" the game's description. See js/core/SimpleGames.js.
+	  A procedure for the renaming has been added but is not yet included in
+	  the user interface.
+	* Added (basic) compatibility test for the user agent's rendering and
+	  JavaScript engine in index.html.
+	* Added input option with vectors of coalitions.
+	* Replaced different dialogs for different input methods by a single dialog
+	  windows with different tabs instead.
+	* Added the Apache license in COPYING to the css/ folder. The license is
+	  used by the stylesheets copied from the google closure library.
+	* Added considerable faster versions for the computation of the QOBDDs for
+	  the shift-minimal winning and shift-maximal losing coalitions. The old
+	  implementation are still there for reference and have a "_old" suffix.
+	  See js/core/QOBDD.js for details.
+	* Added standalone program to benchmark some of the lab's functions.
+	  See embed/examples/benchmark/ for details.
+	* FWVGModelService makes use of the enumeration capabilities of the
+	  SimpleGame. In consequence, it should be able to generate ILPs for much
+	  more complex games because the objects (models/coals) do not have to be
+	  stored in memory anymore. 
+	* Added capability to enumerate coalitions and models to the SimpleGame
+	  interface.
+	* Added QOBDD.enumerateSets to enumerate the sets represented by a QOBDD.
+	* FWVGModelService can now be set up with a factory for the model of the
+	  linear program. The intention is to allow models that do not store copies
+	  of the constraints but instead redirect them (somehow) to the standard
+	  output.
+	* Fixed some typos.
+	* Upper bound for the weights in the random game dialog is strict now.
+	* Added option to order the weights of all rules in a random game
+	  automatically.
+	* Added option to create and load a random game without using the dialog.
+	* Added option to create and load a random game at once to the random
+	  game dialog.
+	* Removed js/core/ModelCounterConsecutive.js. Has been replaced by 
+	  js/core/MDDView.js. Removed js/core/ModelCollectorConsecutive.js for the
+	  same reason.
+	* Implemented the multivalued decision diagrams (MDD) on the top of a 
+	  QOBDD. Using MDDs models of coalitions can more efficiently be counted
+	  and enumerated. The algorithm are trivial in these cases. The algorithms
+	  have not been integrated in the remaining code. See MDDView.js for
+	  details.
+	* Added US Federal Legal System as an example.
+	* Fixed problem with wrong results for Preorder.getDirectSuccessorsOf. This
+	  caused wrong results for the shift-minimal winning and shift-maximal
+	  losing QOBDDs (+coalitions, +models). Has been fixed by implementing a
+	  preorder separately by a partition and a partial order set (poset).
+	  The overall complexity of the relevant code has been lowered
+	  significantly. See Preorder.js, Poset.js and Partition.js for details.
+	* Fixed problem that after a game with non-consecutive games the number of
+	  models is not shown for following game not matter if they have
+	  consecutive types or not.
+
+Sept. 2011:
+	* Release of version 2.0.
+	* Removed js/History.js and the relevant parts in lab.html.
+	* Added file ui.html for elements in the user interface, e.g. Dialogs.
+	* Added US Electoral College 2012-2020 to the examples. Removed parliament
+	  of france.
+	* Removed dependency to the global verbose() function for debug messages.
+	* Added embedding examples using the SpiderMonkey shell to create FWVG
+	  models (embed/examples/fwvg/) and WVG models using the QOBDD approach
+	  (embed/examples/wvg/). 
+	* Rewrote js/core/FindWVGReprService.js and renamed it to
+	  js/core/WVGModelService.js.
+	* Added QOBDD.writePlain.
+	* Added QOBDD.countRefs.
+
+Aug. 2011:
+    * Added embed/lab.js which can be used to load the laboratory without a
+      browser in an easy way. For instance, in conjunction with the
+      SpiderMonkey JavaScript shell.
+	* Augmented the help pages.
+	* Removed SimpleGame.toLinearProgram.
+	* Integrated new metrics into the user interface, e.g, numbers of models,
+	  losing coalitions.
+	* Replaced a lot of function in SimpleGame by a generic approach. See
+	  addQOBDDMethods in SimpleGame's constructor for details.
+	* ThresholdCache now also uses a hash table. Some games can be loaded
+	  significantly faster using this approach. The overall impact seems to be
+	  positive.
+    * Removed js/core/FWVGReprModelService.js and js/core/BooleanFormula.js.
+    * Added js/core/GMPL_LPBuilder which implements LinearProgram.Builder for
+      the GNU MathProg Language.
+    * Moved methods from QOBDD.Node's constructor to QOBDD.Node.prototype.
+	* Re-implemented the previous point in js/core/Formula.js,
+	  js/core/NaryTree.js and FWVGModelService.js
+	* Implemented the missing generation of ILP models for f-weighted voting
+	  games (FWVGs). See js/core/FWVGReprModelService.js for details.
+	* Added method SimpleGame.getMinWinModelCount.
+	* Added method SimpleGame.getMaxLosingModelCount.
+	* Added method SimpleGame.getShiftMinWinModelCount.
+	* Added method SimpleGame.getShiftMaxLosingModelCount.
+    * Added js/core/BooleanFormula.js.
+    * Fixed a bug in parse_mwvg (SimpleGame.js).
+	* Added method AtLeastAsDesirable.getTypeOrder.
+	* Added method SimpleGame.getShiftMinWinModels.
+	* Added method SimpleGame.getShiftMaxLosingModels.
+	* Added method SimpleGame.getShiftMaxLosingQOBDD.
+	* Added method SimpleGame.isConsecutive.
+	* Added js/core/Misc.js.
+	* Added js/core/ModelCollectorConsecutive.js.
+	* Added js/core/ModelCounterConsecutive.js.
+    * Added method AtLeastAsDesirable.getTypeVector.
+    * Added js/core/FWVGReprModelService.js.
+    * Added method SimpleGame.getMaxLosingQOBDD.
+    * Added output of a linear program in CPLEX format (js/core/CPLEX_LPBuilder.js).
+	* Added convenient creation of models of linear (integer) programs
+	  (js/core/LinearProgram.js).
+	* Added subdirectory js/core to store files which can be used as a library.
+	* Added this file.
+	
+May. 2011:
+	* Fixed a serious bug in QOBDD.Manager.or_manip. As a result,
+	  the computation of the shift-minimal winning coalitions was wrong
+	  in the current version.
+	

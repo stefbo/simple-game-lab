@@ -1,0 +1,32 @@
+This is an example how to use the core of the laboratory into a standalone
+exectuable using the JavaScript Shell shipped with Mozilla SpiderMonkey. See
+[1] for details.
+
+If you intent to start the executable from a different place, use have to fix
+the path to the laboratory files in fwvg.js first. The program can be started
+with
+
+	$ js fwvg.js <formula>
+	
+where formula is a Boolean formula which is used to build the desired integer
+programming model. A short help message is available by the -h option:
+
+	$ js fwvg.js -h
+	
+The game is read from the standard input. The format is the same as in the
+laboratory. As an example
+
+	    5 9
+	x5  1 1 Permanent Member
+	x10 0 1 Non-permanent Member
+	
+models the UN Security Council.
+
+Command line arguments for the JavaScript shell can be passed in front of the
+JavaScript file fwvg.js, for instance
+
+	$ js -m fwvg.js <formula>
+	
+can be used to enable just-in-time compilation.
+
+[1] https://developer.mozilla.org/en/introduction_to_the_javascript_shell

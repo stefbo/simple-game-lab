@@ -1,0 +1,1646 @@
+<!--
+ lab.html
+
+  Copyright (C) 2011,2012 Stefan Bolus, University of Kiel, Germany
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
+
+<html>
+<head>
+	<title>Simple Games Lab</title>
+
+	<script type="text/javascript" src="js/Config.js"></script>
+    <script type="text/javascript" src="js/Helper.js"></script>
+    <script type="text/javascript" src="js/Metric.js"></script>
+    <script type="text/javascript">
+    	IncludeJavaScript (Config.closure_library_path + '/closure/goog/base.js');
+    </script>
+    <script type="text/javascript">
+    	goog.require('goog.ui.Dialog');
+    	goog.require('goog.string'); // goog.string.htmlEscape
+    	goog.require('goog.ui.Tab');
+        goog.require('goog.ui.TabBar');
+        goog.require('goog.userAgent');
+    </script>    
+    <script type="text/javascript">
+    	IncludeJavaScript (Config.jshashtable_path + '/jshashtable.js');
+    	IncludeJavaScript (Config.jshashtable_path + '/jshashset.js');
+    </script>
+    <script type="text/javascript" src="js/core/Misc.js"></script>
+    <script type="text/javascript" src="js/core/ThresholdCache.js"></script>
+    <script type="text/javascript" src="js/core/WVG.js"></script>
+    <script type="text/javascript" src="js/core/Tables.js"></script>
+    <script type="text/javascript" src="js/core/QOBDD.js"></script>
+    <script type="text/javascript" src="js/core/Manip.js"></script>
+    <script type="text/javascript" src="js/core/DisjointSets.js"></script>
+    <script type="text/javascript" src="js/core/Mergesort.js"></script>
+    <script type="text/javascript" src="js/core/Partition.js"></script>
+	<script type="text/javascript" src="js/core/Poset.js"></script>
+    <script type="text/javascript" src="js/core/Preorder.js"></script>
+    <script type="text/javascript" src="js/core/Isbell1958.js"></script>
+	<script type="text/javascript" src="js/core/PEG.js"></script>
+	<script type="text/javascript" src="js/core/BoolParser.js"></script>
+	<script type="text/javascript" src="js/core/InputConversion.js"></script>
+	<script type="text/javascript" src="js/core/Sudhoelter1989.js"></script>
+	<script type="text/javascript" src="js/core/Bolus2011.js"></script>
+	<script type="text/javascript" src="js/core/PowerIndices.js"></script>
+	<script type="text/javascript" src="js/core/SimpleGame.js"></script>
+	<script type="text/javascript" src="js/core/Timer.js"></script>
+	<script type="text/javascript" src="js/draw.js"></script>
+	<script type="text/javascript" src="js/core/GameExamples.js"></script>
+	<script type="text/javascript" src="js/DrawLattice.js"></script>
+	<script type="text/javascript" src="js/Solver.js"></script>
+	<script type="text/javascript" src="js/core/CoatesLewis1961.js"></script>
+	<script type="text/javascript" src="js/core/LinearProgram.js"></script>
+	<script type="text/javascript" src="js/core/CPLEX_LPBuilder.js"></script>
+	<script type="text/javascript" src="js/core/GMPL_LPBuilder.js"></script>
+	<script type="text/javascript" src="js/core/MDDView.js"></script>
+	<script type="text/javascript" src="js/core/NaryTree.js"></script>
+	<script type="text/javascript" src="js/core/Formula.js"></script>
+	<script type="text/javascript" src="js/core/WVGModelService.js"></script>
+	<script type="text/javascript" src="js/core/FWVGModelService.js"></script>
+	
+	<script type="text/javascript">
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.core.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.annotate.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.context.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.tooltips.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.zoom.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.common.resizing.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.pie.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.line.js');
+		IncludeJavaScript (Config.rgraph_path + '/libraries/RGraph.bar.js');
+	</script>
+    
+    <script type="text/javascript">
+    
+	/**
+	 * @var game
+	 * 
+	 * The game object of type \ref SimpleGame. Initially undefined.
+	 */
+	var game = null;
+
+    function clearCanvas (name) {
+        var canvas = document.getElementById(name);
+        var ctx = canvas.getContext("2d");
+        canvas.width = canvas.width; // clears the canvas.
+     }
+
+	function showProp (name, htmlVal) {
+		document.getElementById(name+'Hide').style.display = 'none';
+		if (htmlVal !== undefined)
+			document.getElementById(name).innerHTML = htmlVal;
+		document.getElementById(name+'Show').style.display = 'block';
+	} 
+	
+	function showProp2 (name, res) {
+		document.getElementById(name+'Hide').style.display = 'none';
+		if (document.getElementById(name+'Show'))
+			document.getElementById(name+'Show').style.display = 'block';
+		var what = (res === true) ? "True" : ((res === false) ? "False" : "Maybe");
+		var elem = document.getElementById(name+what);
+		if (elem.tagName.toLowerCase() === 'span')
+			elem.style.display = 'inline';
+		else elem.style.display = 'block';
+	} 
+	
+  	
+	/**
+	 * Loads the game into the user interface. The \ref SimpleGame object is 
+	 * available in the global (evil) game object. 
+	 */
+  	function loadGame (str) {
+  		if (str.length == 0)
+  			return; // Nothing to load.
+  	
+  		resetUI ();
+  		
+  		try {
+		game = parse_mwvg (str);
+		
+		var observer = {
+			haveWinQOBDD : 		function (g) {
+				MetricsSingleton.getByName('win_qobdd').disclose();
+				MetricsSingleton.getByName('win_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('win_models').disclose();
+				}
+			},
+			haveMinWinQOBDD : 	function (g) { 
+				MetricsSingleton.getByName('minwin_qobdd').disclose();
+				MetricsSingleton.getByName('minwin_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('minwin_models').disclose();
+				}
+			},
+			haveShiftMinWinQOBDD : function (g) {
+				MetricsSingleton.getByName('shift-minwin_qobdd').disclose();
+				MetricsSingleton.getByName('shift-minwin_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('shift-minwin_models').disclose();
+				}
+			},
+			haveLosingQOBDD : 		function (g) {
+				MetricsSingleton.getByName('losing_qobdd').disclose();
+				MetricsSingleton.getByName('losing_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('losing_models').disclose();
+				}
+			},
+			haveMaxLosingQOBDD : 	function (g) {
+				MetricsSingleton.getByName('maxlosing_qobdd').disclose();
+				MetricsSingleton.getByName('maxlosing_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('maxlosing_models').disclose();
+				}
+			},
+			haveShiftMaxLosingQOBDD : function (g) {
+				MetricsSingleton.getByName('shift-maxlosing_qobdd').disclose();
+				MetricsSingleton.getByName('shift-maxlosing_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('shift-maxlosing_models').disclose();
+				}
+			},
+			haveBlockingQOBDD : function (g) {
+				MetricsSingleton.getByName('blocking_qobdd').disclose();
+				MetricsSingleton.getByName('blocking_coals').disclose();
+				if (g.hasAlad()) {
+					MetricsSingleton.getByName('blocking_models').disclose();
+				}
+			},
+			
+			haveIsComplete : 	function (g) { showProp2('isComplete', game.isComplete()); },
+			haveIsConsecutive : function (g) { showProp2('isConsecutive', game.isConsecutive()); },
+			haveIsDirected : 	function (g) { 
+				showProp2('isDirected', game.isDirected());
+				game.getAlad().getSymmetryClasses(); showProp('symmClasses', game.getAlad().getSymmetryClasses().length);
+			},
+			haveIsHomogeneous : function (g) {
+				if (game.isHomogeneous()) {
+					var elem = document.getElementById('NaturalRepr');
+					if (game.getPlayerCount() > 10) elem.innerHTML = "Yes";
+					else elem.innerHTML = game.getNaturalRepr();
+				}
+				showProp2('isHom', game.isHomogeneous());
+
+			},
+			haveIsWeighted : 	function (g) { showProp2('isWeighted', game.isWeighted()); },
+			haveIsProper : 		function (g) { showProp2('isProper', game.isProper()); },
+			haveIsStrong : 		function (g) { showProp2('isStrong', game.isStrong()); },
+			haveIsDecisive : 	function (g) { showProp2('isDecisive', game.isDecisive()); },
+			
+			haveDummies : 		function (g) {
+				var dummies = game.getDummyPlayers();
+				showProp2('dummies', dummies.length > 0);
+				if (dummies.length > 0)
+					document.getElementById('numDummies').innerHTML = game.getNamedCoalStr(dummies);
+			},
+			haveVetoers : 		function (g) {
+				var vetoers = game.getVetoPlayers();
+				showProp2('vetoers', vetoers.length > 0);
+				if (vetoers.length > 0)
+					document.getElementById('vetoers').innerHTML = game.getNamedCoalStr(vetoers);
+			},
+			haveDictator : 		function (g) {
+				showProp2('dictator', game.hasDictator());
+				if (game.hasDictator())
+					document.getElementById('dictator').innerHTML = game.getPlayerName(game.getDictator());
+			},
+			
+			haveAlad : function (g) {
+				function disclose (what) { MetricsSingleton.getByName(what).disclose(); }
+				
+				// We always have that QOBDD.
+				disclose('win_models');
+				
+				if (g.haveMinWinQOBDD()) { disclose('minwin_models'); }
+				if (g.haveShiftMinWinQOBDD()) { disclose('shift-minwin_models'); }
+				if (g.haveBlockingQOBDD()) { disclose('blocking_models'); }
+				
+				if (g.haveLosingQOBDD()) { disclose('losing_models'); }
+				if (g.haveMaxLosingQOBDD()) { disclose('maxlosing_models'); }
+				if (g.haveShiftMaxLosingQOBDD()) { disclose('shift-maxlosing_models'); }
+			},
+			
+			haveBanzhaf : 		function (g) { showProp ("Banzhaf"); showBanzhaf(); },
+			haveShapleyShubik : function (g) { showProp ("ShapleyShubik"); showShapleyShubik(); },
+			haveHollerPackel : 	function (g) { showProp ("HollerPackel"); showHollerPackel(); },
+			haveDeeganPackel : 	function (g) { showProp ("DeeganPackel"); showDeeganPackel(); },
+			haveShiftPower : 	function (g) { showProp ("ShiftPower"); showShiftPower(); }
+		};
+		game.registerObserver(observer);
+		
+		document.getElementById('noGameLoaded').style.display = 'none';
+		document.getElementById('gameInfo').style.display = 'block';
+		document.getElementById('gameProps').style.display = 'block';
+		document.getElementById('PowerIndices').style.display = 'block';
+		
+		document.getElementById('metricsWinTable').style.display = 'block';
+		document.getElementById('metricsLosingTable').style.display = 'block';
+		
+		document.getElementById('gameNameCopy').innerHTML = goog.string.htmlEscape(document.getElementById('gameName').value);
+		var classCount = game.getPlayerClasses().length;
+		document.getElementById('numPlayers').innerHTML = game.getPlayerCount();
+		if (game.getPlayerCount() != classCount) {
+			document.getElementById('numPlayers').innerHTML += ' in ' + classCount + ' classes';
+		}
+		
+		/* Check if the game is multiple weighted. If so, draw the weights for
+		 * each rule in a chart. */
+		var rules = game.getRules();
+		var is_mwvg = true;
+		var weights = [];
+		for (var i in rules) {
+			if ( rules[i] instanceof RuleWVG)
+				weights.push(rules[i]._toWVG().weights);
+			else {
+				is_mwvg = false;
+				break;
+			}
+		}
+		if (is_mwvg) {
+			document.getElementById('weightsChartDiv').style.display = 'block';
+			clearCanvas ("weightsChart");
+			
+	     	var line = new RGraph.Line("weightsChart", weights);
+	        //line.Set('chart.colors', ['red', 'green', 'blue', 'yellow', 'grey']);
+	        //line.Set('chart.tickmarks', ['circle', 'square']);
+	        line.Set('chart.gutter', 40);
+	        line.Draw();    
+		}
+
+		/* If the QOBDD of W has limited size, compute some properties without
+		 * user interaction. */
+		 if (game.getWinQOBDD().sizeAtMost(500)) {
+			 game.getMinWinQOBDD();
+			 game.getBlockingQOBDD();
+			 game.getLosingQOBDD();
+			 game.getMaxLosingQOBDD();
+
+			 game.isComplete(); // calls game.getAlad()
+			 game.isDirected();
+			 game.isHomogeneous();
+			 game.isWeighted();
+			 game.isProper();
+			 game.isStrong();
+			 game.isDecisive();
+			 game.getDummyPlayers();
+			 game.getVetoPlayers();
+			 game.hasDictator();
+			 
+			if (game.isHomogeneous()
+					|| game.getWinQOBDD().sizeAtMost(250)) {
+				game.getShiftMinWinQOBDD();
+				game.getShiftMaxLosingQOBDD();
+			}
+		 }
+		 }
+		 catch (e) {
+		 	if (e instanceof ParserException) {
+		 		alert ("Error during parsing. Reason: " + e);
+		 	}
+		 }
+  	}
+  	
+  	function loadSelectedExample (elem) {
+  		var id = elem.options[elem.selectedIndex].value;
+  		if(example_games[id])  {
+  			document.getElementById('input').value = example_games[id].input;
+  			document.getElementById('gameName').value = example_games[id].name;
+  		}
+  	}
+    </script>
+    
+    <link rel="stylesheet" href="css/main.css"></link>
+    <link rel="stylesheet" href="css/dialog.css"></link>
+    <link rel="stylesheet" href="css/tab.css"></link>
+
+</head>
+<!-- handleKeyDown belongs to the drawing engine for lattices. -->
+<body>
+
+	<form method="GET" onSubmit="return false;">
+	
+	<!-- The Input -->
+	<div style="width: 39%; border: 0px solid black; float: left; padding: 3px;">
+		<table width="100%">
+		<tr>
+			<td><b>Game: </b> <input type="text" size="20" value="Name (optional)" id="gameName" 
+				onClick="if(/^Name/.test(this.value)) this.value='';"/> 
+				<a href="#" onClick="showHelp(); return false;">Help</a>
+			</td>
+		<td align="right"><input type="button" value="Load" onClick="loadGame(document.getElementById('input').value);"/></td>
+		</tr></table>
+		<textarea id="input" rows="35" style="width:100%"></textarea>
+		<div>
+		<input type="button" value="Enter [Q;w1,..,wn]" onClick="enterWVG();" />
+		<input type="button" value="Enter Other Format" onClick="enterOtherFormat();" />
+		<input type="button" value="Create at Random" onClick="createAtRandom();" />
+		<img style="vertical-align: middle" src="images/refresh.jpg" onClick="createAtRandom(true /*no dialog*/);" alt="Recreate and load."/>
+		</div>
+		
+		<div style="text-align:right">
+			Examples: <select id="examples" style="width:50%" onChange="loadSelectedExample(this);">
+	  			<option value="">Choose an Example</option>
+			</select>
+		</div>
+	</div>
+	
+	<!-- Game Information -->
+	<div style="width: 59%; border: 0px solid black; float: right; padding: 3px;">
+		<h2>Game Overview &amp; Properties</h2>
+		
+		<div id="noGameLoaded">
+			<p><b>(No Game Loaded)</b></p>
+			
+			<p>
+				To start, enter a (multiple) weighted voting game on the left 
+				and then press the <b>Load</b>-Button. If this is your first
+				visit, you should start with an example, e.g. the 
+				<a href="http://en.wikipedia.org/wiki/UN_Security_Council" 
+				class="external">UN Security Council</a> or a 
+				<a href="http://en.wikipedia.org/wiki/US_Electoral_College" class="external">
+				US Electoral College</a>.
+			</p>
+			
+			<p>
+				There is also a <a href="#" onClick="showHelp(); return false;">
+				help</a> available. The author can be contacted 
+				<a href="http://www.informatik.uni-kiel.de/~stb">here</a>. 
+				General	information are available on the <a href="index.html" 
+				target="_blank">main page</a>.
+			</p>
+		</div>
+		
+		<table class="properties" width="100%" style="display:none; margin-left:30px;" id="gameInfo">
+			<tr><td>Name : </td><td><span id="gameNameCopy"></span></td></tr>
+			<tr><td>#Players : </td><td><span id="numPlayers"></span></td></tr>
+		</table>
+		
+		<div id="weightsChartDiv" style="display:none">
+			<canvas id="weightsChart" width="400" height="200">[Please wait...]</canvas>
+		</div>
+		
+		<table><tr><td>
+		<table id="metricsWinTable" class="metrics" style="width:100%; display:none;">
+      <col/>
+      <tr>
+	<th></th>
+	<th>&#x1d4e6;</th>
+	<th>&#x1d4e6;<sub>min</sub></th>
+	<th>&#x1d4e6;<sub>shift</sub></th>
+	<th>&#x1d4e6;<sup>d</sup></th>
+      </tr>
+      <tr>
+	<td>Q<small>OBDD</small></td>
+	<td id="tdWinQOBDD"></td>
+	<td id="tdMinWinQOBDD"></td>
+	<td id="tdShiftMinWinQOBDD"></td>
+	<td id="tdBlockingQOBDD"></td>
+      </tr>
+      <tr>
+	<td>Coals.</td>
+	<td id="tdWinCoals"></td>
+	<td id="tdMinWinCoals"></td>
+	<td id="tdShiftMinWinCoals"></td>
+	<td id="tdBlockingCoals"></td>
+      </tr>
+      <tr>
+	<td>Models</td>
+	<td id="tdWinModels"></td>
+	<td id="tdMinWinModels"></td>
+	<td id="tdShiftMinWinModels"></td>
+	<td id="tdBlockingModels"></td>
+      </tr>
+    </table>
+
+<br/>
+    <table id="metricsLosingTable" class="metrics" style="width:100%; display:none;">
+      <col/>
+      <tr>
+	<th></th>
+	<th>&#x1D4DB;</th>
+	<th>&#x1D4DB;<sub>max</sub></th>
+	<th>&#x1D4DB;<sub>shift</sub></th>
+	<th>&nbsp;</th>
+      </tr>
+            <tr>
+	<td>Q<small>OBDD</small></td>
+	<td id="tdLosingQOBDD"></td>
+	<td id="tdMaxLosingQOBDD"></td>
+	<td id="tdShiftMaxLosingQOBDD"></td>
+	<td></td>
+      </tr>
+      <tr>
+	<td>Coals.</td>
+	<td id="tdLosingCoals"></td>
+	<td id="tdMaxLosingCoals"></td>
+	<td id="tdShiftMaxLosingCoals"></td>
+	<td></td>
+      </tr>
+      <tr>
+	<td>Models</td>
+	<td id="tdLosingModels"></td>
+	<td id="tdMaxLosingModels"></td>
+	<td id="tdShiftMaxLosingModels"></td>
+	<td></td>
+      </tr>
+    </table>
+    </td></tr></table>
+
+	<script type="text/javascript">
+	/* Winning and Blocking */
+    MetricsSingleton.register (new Metric (document.getElementById('tdWinQOBDD'), 'win_qobdd', function () { return game.getWinQOBDD().size(); }, function () { showWinQOBDD(game.getWinQOBDD(), 'QOBDD of &#x1d4e6;'); }));
+    MetricsSingleton.register (new Metric (document.getElementById('tdMinWinQOBDD'), 'minwin_qobdd', function () { return game.getMinWinQOBDD().size(); }, function () { showQOBDD(game.getMinWinQOBDD(), 'QOBDD of &#x1d4e6;<sub>min</sub>'); }));
+    MetricsSingleton.register (new Metric (document.getElementById('tdShiftMinWinQOBDD'), 'shift-minwin_qobdd', function () { return game.getShiftMinWinQOBDD().size(); }, function () { showQOBDD(game.getShiftMinWinQOBDD(), 'QOBDD of &#x1d4e6;<sub>shift</sub>'); }));
+    MetricsSingleton.register (new Metric (document.getElementById('tdBlockingQOBDD'), 'blocking_qobdd', function () { return game.getBlockingQOBDD().size(); }, function () { showQOBDD(game.getBlockingQOBDD(), 'QOBDD of &#x1d4e6;<sup>d</sup>'); }));
+    	
+	MetricsSingleton.register (new Metric (document.getElementById('tdWinCoals'), 'win_coals', function () { return game.getWinCount(); }, function () { showCoals(game.getWinQOBDD(), 'Winning Coalitions &#x1d4e6;'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdMinWinCoals'), 'minwin_coals', function () { return game.getMinWinCount(); }, function () { showCoals(game.getMinWinQOBDD(), 'Minimal Winning Coalitions &#x1d4e6;<sub>min</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdShiftMinWinCoals'), 'shift-minwin_coals', function () { return game.getShiftMinWinCount(); }, function () { showCoals(game.getShiftMinWinQOBDD(), 'Shift-minimal Winning Coalitions &#x1d4e6;<sub>shift</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdBlockingCoals'), 'blocking_coals', function () { return game.getBlockingQOBDD().countMinterms(); }, function () { showCoals(game.getBlockingQOBDD(), 'Blocking Coalitions &#x1d4e6;<sup>d</sup>'); }));
+	
+	MetricsSingleton.register (new Metric (document.getElementById('tdWinModels'), 'win_models', function () { return game.getWinModelCount(); }, function () { showModels(game.getWinQOBDD(), 'Models of the Winning Coalitions &#x1d4e6;'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdMinWinModels'), 'minwin_models', function () { return game.getMinWinModelCount(); }, function () { showModels(game.getMinWinQOBDD(), 'Models of the Minimal Winning Coalitions &#x1d4e6;<sub>min</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdShiftMinWinModels'), 'shift-minwin_models', function () { return game.getShiftMinWinModelCount(); }, function () { showModels(game.getShiftMinWinQOBDD(), 'Models of the Shift-minimal Winning Coalitions &#x1d4e6;<sub>shift</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdBlockingModels'), 'blocking_models', function () { return game.getBlockingModelCount(); }, function () { showModels(game.getBlockingQOBDD(), 'Models of the Blocking Coalitions &#x1d4e6;<sup>d</sup>'); }));
+	
+	/* Losing */
+	MetricsSingleton.register (new Metric (document.getElementById('tdLosingQOBDD'), 'losing_qobdd', function () { return game.getLosingQOBDD().size(); }, function () { showQOBDD(game.getLosingQOBDD(), 'QOBDD of &#x1D4DB;'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdMaxLosingQOBDD'), 'maxlosing_qobdd', function () { return game.getMaxLosingQOBDD().size(); }, function () { showQOBDD(game.getMaxLosingQOBDD(), 'QOBDD of  &#x1D4DB;<sub>max</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdShiftMaxLosingQOBDD'), 'shift-maxlosing_qobdd', function () { return game.getShiftMaxLosingQOBDD().size(); }, function () { showQOBDD(game.getShiftMaxLosingQOBDD(), 'QOBDD of &#x1D4DB;<sub>shift</sub>'); }));
+	
+	MetricsSingleton.register (new Metric (document.getElementById('tdLosingCoals'), 'losing_coals', function () { return game.getLosingCount(); }, function () { showCoals(game.getLosingQOBDD(), 'Losing Coalitions &#x1D4DB;'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdMaxLosingCoals'), 'maxlosing_coals', function () { return game.getMaxLosingCount(); }, function () { showCoals(game.getMaxLosingQOBDD(), 'Maximal Losing Coalitions &#x1D4DB;<sub>max</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdShiftMaxLosingCoals'), 'shift-maxlosing_coals', function () { return game.getShiftMaxLosingCount(); }, function () { showCoals(game.getShiftMaxLosingQOBDD(), 'Shift-maximal Losing Coalitions &#x1D4DB;<sub>shift</sub>'); }));
+	
+	MetricsSingleton.register (new Metric (document.getElementById('tdLosingModels'), 'losing_models', function () { return game.getLosingModelCount(); }, function () { showModels(game.getLosingQOBDD(), 'Models of the Losing Coalitions &#x1D4DB;'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdMaxLosingModels'), 'maxlosing_models', function () { return game.getMaxLosingModelCount(); }, function () { showModels(game.getMaxLosingQOBDD(), 'Models of the Maximal Losing Coalitions &#x1D4DB;<sub>max</sub>'); }));
+	MetricsSingleton.register (new Metric (document.getElementById('tdShiftMaxLosingModels'), 'shift-maxlosing_models', function () { return game.getShiftMaxLosingModelCount(); }, function () { showModels(game.getShiftMaxLosingQOBDD(), 'Models of the Shift-maximal Losing Coalitions &#x1D4DB;<sub>shift</sub>'); }));
+	</script>
+
+<!-- vertical space -->
+<div style="height:20px;"></div>
+
+			<table class="properties" width="100%" style="display:none; margin-left:30px;" id="gameProps">
+			<tr>
+				<td>Is Complete :<br/><span style="font-size:75%">(Swap-robust?)</span></td>
+				<td><div id="isCompleteHide" onClick="game.isComplete();"><span class="compute">compute</span></div>
+					<div id="isCompleteShow">
+					<!-- Symmetry Classes, Ordering of the Symmetry Classes, Ordering if not directed -->
+					<span class="computable" id="isCompleteTrue">Yes (</span>
+					<span class="computable" id="isCompleteFalse">No
+						<small>(<a href="#" onClick="showNotCompleteWitness(); return false;">witness</a>,
+							<a href="#" onClick="showAlad(); return false;">show &#8829;<sub>I</sub></a>,</small>
+					</span>
+					<small><a href="javascript:showGridAlad();">show relation</a>)</small>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>#Symmetry Classes of &#8829;<sub>I</sub> :</td>
+				<td><div id="symmClassesHide" onClick="game.getAlad().getSymmetryClasses(); showProp('symmClasses', game.getAlad().getSymmetryClasses().length);"><span class="compute">compute</span></div>
+					<div class="computable" id="symmClassesShow"><span id="symmClasses"></span> 
+						<small>(<a href="#" onClick="showSymmetryClasses(); return false;">show</a>)</small>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Directed <small>(<i style="font-family: serif;">1&#8829;<sub>I</sub>...&#8829;<sub>I</sub>n</i>)</small> :</td>
+				<td><div id="isDirectedHide" onClick="game.isDirected();"><span class="compute">compute</span></div>
+					<div class="computable" id="isDirectedTrue">Yes</div>
+					<div class="computable" id="isDirectedFalse">No 
+						<small>(<a href="#" onClick="showNonIncrOrder(); return false;">show order</a>, 
+							<a href="javascript:makeDirected()">reorder</a>)</small>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Consecutive :</td>
+				<td><div id="isConsecutiveHide" onClick="game.isConsecutive();"><span class="compute">compute</span></div>
+					<div id="isConsecutiveShow">
+						<span class="computable" id="isConsecutiveTrue">Yes</span>
+						<span class="computable" id="isConsecutiveFalse">No</span>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Homogeneous : </td>
+				<td><div id="isHomHide" onClick="game.isHomogeneous();"><span class="compute">compute</span></div>
+					<div class="computable" id="isHomTrue"><span id="NaturalRepr"></span> 
+						<small>(<a href="#" onClick="showHomogeneous(); return false;">more</a>)</small>
+					</div>
+					<div class="computable" id="isHomFalse">No</div>
+					<div class="computable" id="isHomMaybe">Maybe. The game is not directed.</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Proper :</td>
+				<td><div id="isProperHide" onClick="game.isProper();"><span class="compute">compute</span></div>
+					<div class="computable" id="isProperTrue">Yes</div>
+					<div class="computable" id="isProperFalse">
+						No <small>(<a href="#" onClick="showNotProperWitness(); return false;">witness</a>)</small>
+					</div>
+			</tr>
+			<tr>
+				<td>Is Strong :</td>
+				<td><div id="isStrongHide" onClick="game.isStrong();"><span class="compute">compute</span></div>
+					<div class="computable" id="isStrongTrue">Yes</div>
+					<div class="computable" id="isStrongFalse">
+						No <small>(<a href="#" onClick="showNotStrongWitness(); return false;">witness</a>)</small>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Decisive :</td>
+				<td><div id="isDecisiveHide" onClick="game.isDecisive();"><span class="compute">compute</span></div>
+					<div class="computable" id="isDecisiveTrue">Yes</div>
+					<div class="computable" id="isDecisiveFalse">No <small>(Not proper and/or not strong)</small></div>
+				</td>
+			</tr>
+			<tr>
+				<td>Is Weighted :</td>
+				<td><div id="isWeightedHide" onClick="game.isWeighted();"><span class="compute">compute</span></div>
+					<div id="isWeightedShow">
+					<span class="computable" id="isWeightedTrue">Yes 
+						<small>(<a href="#" onClick="showWeights(); return false;">show</a>,</small>
+					</span>
+					<span class="computable" id="isWeightedFalse">No
+						<small>(<a href="#" onClick="showNotWeightedWitness(); return false;">witness</a>,</small>
+					</span>
+					<span class="computable" id="isWeightedMaybe">Maybe <small>(</small></span>
+					<small><a href="javascript:showLinearProgram();">Solver</a><!--, <a href="javascript:alert('TODO');">Heuristics</a> -->)</small>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Dummies :</td>
+				<td><div id="dummiesHide" onClick="game.getDummyPlayers();"><span class="compute">compute</span></div>
+					<div class="computable" id="dummiesTrue"><div id="numDummies"></div></div>
+					<div class="computable" id="dummiesFalse">No</div>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">Vetoers :</td>
+				<td><div id="vetoersHide" onClick="game.getVetoPlayers();"><span class="compute">compute</span></div>
+					<div class="computable" id="vetoersTrue"><div id="vetoers"></div></div>
+					<div class="computable" id="vetoersFalse">No</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Has Dictator :</td>
+				<td><div id="dictatorHide" onClick="game.getDictator();"><span class="compute">compute</span></div>
+					<div class="computable" id="dictatorTrue"><span id="dictator"></span></div>
+					<div class="computable" id="dictatorFalse">No</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div style="clear: both;">
+	</div>
+	
+	<!-- Power Indices -->
+	<div id="PowerIndices" style="display:none">
+		<h2>Power Indices</h2>
+		<div><a class="compute" href="#" onClick="comparePowerIndices(); return false;">Compare</a> selected indices.</div>
+		<table class="power-indices-graphs" width="100%">
+		<tr>
+			<!-- Banzhaf -->
+			<td>
+				<b>Banzhaf Index</b> <small><input type="checkbox" id="compareBanzhaf" /> Compare?</small>
+				<center>
+				<div id="BanzhafHide" onClick="game.getAbsBanzhaf();"><span class="compute">compute</span></div>
+				<div id="BanzhafShow" style="text-align:center;" class="computable">
+					<canvas id="canvasBanzhaf" width="400" height="200">[No canvas support]</canvas><br/>
+				</div>
+				</center>
+			</td>
+			
+			<!-- Shapley-Shubik -->
+			<td >
+				<b>Shapley-Shubik Index</b> <small><input type="checkbox" id="compareShapleyShubik" /> Compare?</small>
+				<center>
+				<div id="ShapleyShubikHide" onClick="game.getShapleyShubik();"><span class="compute">compute</span></div>
+				<div id="ShapleyShubikShow" style="text-align:center;" class="computable">
+					<canvas id="canvasShapleyShubik" width="400" height="200">[No canvas support]</canvas><br/>
+				</div>
+				</center>
+			</td>
+		</tr>
+		<tr>
+			<!-- Holler-Packel -->
+			<td >
+				<b>Holler-Packel Index</b> <small><input type="checkbox" id="compareHollerPackel" /> Compare?</small>
+				<center>
+				<div id="HollerPackelHide" onClick="game.getAbsHollerPackel();"><span class="compute">compute</span></div>
+				<div id="HollerPackelShow" style="text-align:center;" class="computable">
+					<canvas id="canvasHollerPackel" width="400" height="200">[No canvas support]</canvas><br/>
+				</div>
+				</center>
+			</td>
+		
+			<!-- Deegan-Packel -->
+			<td>
+				<b>Deegan-Packel Index</b> <small><input type="checkbox" id="compareDeeganPackel" /> Compare?</small>
+				<center>
+				<div id="DeeganPackelHide" onClick="game.getDeeganPackel();"><span class="compute">compute</span></div>
+				<div id="DeeganPackelShow" style="text-align:center;" class="computable">
+					<canvas id="canvasDeeganPackel" width="400" height="200">[No canvas support]</canvas><br/>
+				</div>
+				</center>
+			</td>
+
+		</tr>
+		<tr>
+			<!-- Shift-Power -->
+			<td colspan="2" valign="middle" style="border:1px #aaa solid; padding:5px">
+				<b>Shift Power Index</b> <small><input type="checkbox" id="compareShiftPower" /> Compare?</small>
+				<center>
+				<div id="ShiftPowerHide" onClick="computeShiftPower();"><span class="compute">compute</span></div>
+				<div id="ShiftPowerShow" style="text-align:center;" class="computable">
+					<canvas id="canvasShiftPower" width="400" height="200">[No canvas support]</canvas><br/>
+				</div>
+				</center>
+			</td>
+		</tr>
+		</table>
+	</div>
+	
+	<script type="text/javascript">
+	
+	function resetUIElem (prefix) {
+		var E = document.getElementById;
+		var suffixes = [ 'True', 'Maybe', 'False', 'Wait', 'Show' ];
+		
+		for (var i in suffixes) {
+			var id = prefix + suffixes[i];
+			if (document.getElementById(id)) 
+				document.getElementById(id).style.display = 'none';
+		}
+		document.getElementById(prefix+'Hide').style.display = 'block';
+	}
+	
+	function resetUI () {
+		var elems = [ 'symmClasses', 'isDirected', 'isHom', 'isProper', 'isStrong',
+				'isDecisive', 'isWeighted', 'dummies', 'vetoers', 'dictator',
+				'Banzhaf', 'HollerPackel', 'ShiftPower', 'ShapleyShubik', 
+				'DeeganPackel',  'isComplete', 'isConsecutive'];
+		
+		for (var i in elems)
+			resetUIElem (elems[i]);
+		
+		document.getElementById('gameInfo').style.display = 'none';
+		document.getElementById('gameProps').style.display = 'none';
+		document.getElementById('PowerIndices').style.display = 'none';
+		document.getElementById('noGameLoaded').style.display = 'block';
+
+		delete game;
+		
+		shift_min_already_computed = false;
+		
+		var metrics = MetricsSingleton.getAll ();
+		for (var i in metrics) {
+			if (metrics.hasOwnProperty(i)) {
+				metrics[i].reset ();
+			}
+		}
+	}
+	
+	function formatBigNumber (n) {
+		var s = ''+n;
+		var chunks = [];
+		for (var start = s.length - 3 ; start >= 0 ; start -= 3)
+			chunks.unshift(s.substr(start,3));
+		if (s.length%3)
+			chunks.unshift(s.substr(0,s.length%3));
+		return chunks.join(",");
+	}
+	
+	function comparePowerIndices () {
+		var cols = [], c;
+		
+		if (document.getElementById('compareBanzhaf').checked) {
+			cols.push({ name: "Bz (Abs)", values: game.getAbsBanzhaf() });
+			cols.push({ name: "Bz (Norm)", values: game.getNormBanzhaf() });
+		}
+		
+		if (document.getElementById('compareShapleyShubik').checked)
+			cols.push({ name: "S-S", values: game.getShapleyShubik() });
+		
+		if (document.getElementById('compareHollerPackel').checked) {
+			cols.push({ name: "H-P (Abs)", values: game.getAbsHollerPackel() });
+			cols.push({ name: "H-P (Norm)", values: game.getNormHollerPackel() });
+		}
+		
+		if (document.getElementById('compareDeeganPackel').checked)
+			cols.push({ name: "D-P", values: game.getDeeganPackel() });
+		
+		if (document.getElementById('compareShiftPower').checked && computeShiftMinWin())
+			cols.push({ name: "Shift Power", values: game.getShiftPower() });
+		
+		var dialog = new goog.ui.Dialog();
+		dialog.setTitle ("Power Indices");
+		var html = '<table class="power-indices-table"><tr><th>Player</th>';
+		html += "<th></th>"; // color
+		for (c in cols) {
+			html += "<th>"+cols[c].name+"</th>";
+		}
+		html += "</tr>";
+		for (var i = 0 ; i < game.getPlayerCount() ; ++i) {
+			var rowBgColor = (i%2!=0) ? "#e6e6e6" : "#fff";  
+			html += '<tr style="background-color: '+rowBgColor+';"><td>'+game.getPlayerName(i)+'</td>';
+			html += '<td style="background-color: '+Config.pie_colors[i]+'; width:20px;"></td>';
+			for (c in cols)
+				html += '<td>'
+					+(new Number(cols[c].values[i])).toFixed(Config.power_index_precision)+"</td>";
+			html += '</tr>\n';
+		}
+		html += "</table>";
+		dialog.setContent (html);
+		dialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK);
+		dialog.setVisible (true);
+	}
+	
+	var shift_min_already_computed = false;
+	function computeShiftMinWin () {
+		if ( !shift_min_already_computed) {
+			var really = true;
+			var warnLimit = Config.warn_shift_min_win_size;
+			
+			if ( game.getMinWinQOBDD().sizeAtLeast (Config.warn_shift_min_win_size))
+				really = window.confirm ('The QOBDD for the minimal winning '
+						+'coalition has at least ' + warnLimit + ' inner nodes. '
+						+'Computation of the shift-minimal winning coalitions can '
+						+'take a very long time even on fast computers and during '
+						+'that computation, your browser can become inoperable.\n'
+						+'\n'
+						+'Are you sure to compute the shift-minimal winning coalitions?');
+			
+			if (really) {
+				game.getShiftMinWinQOBDD();
+				shift_min_already_computed = true;
+			}
+		}
+		return shift_min_already_computed;
+	}
+	
+	var shift_max_already_computed = false;
+	function computeShiftMaxLosing () {
+		if ( !shift_max_already_computed) {
+			var really = true;
+			var warnLimit = Config.warn_shift_max_losing_size;
+			
+			if ( game.getMaxLosingQOBDD().sizeAtLeast (Config.warn_shift_max_losing_size))
+				really = window.confirm ('The QOBDD for the maximal losing '
+						+'coalition has at least ' + warnLimit + ' inner nodes. '
+						+'Computation of the shift-maximal losing coalitions can '
+						+'take a very long time even on fast computers and during '
+						+'that computation, your browser can become inoperable.\n'
+						+'\n'
+						+'Are you sure to compute the shift-maximal losing coalitions?');
+			
+			if (really) {
+				game.getShiftMaxLosingQOBDD();
+				shift_max_already_computed = true;
+			}
+		}
+		return shift_max_already_computed;
+	}
+	
+	function computeShiftPower () { 
+		if (computeShiftMinWin())
+			game.getShiftPower();
+	}
+	
+	function showCoals (qobdd, htmlTitle) {
+		var m = qobdd.countMinterms ();
+		var limit = 64, hardLimit = 1000; 
+		var reallyShow = true;
+
+		if (m > hardLimit) {
+			window.alert ("There are too many coalitions ("+m+").");
+			return;
+		}
+		
+		if (m > limit) {
+			reallyShow = window.confirm ("There are more than "+limit+" coalitions. "
+					+"Show anyway?");
+		}
+		
+		if (reallyShow) {
+			var sets = qobdd.toSet ();
+			var rows = Math.min(20, m);
+			var cnt = '<center><textarea rows="'+rows+'" cols="100">';
+			
+			var dialog = new goog.ui.Dialog();
+			dialog.getTitleTextElement().innerHTML = htmlTitle;
+			
+			for (i in sets)
+				cnt += game.getNamedCoalStr(sets[i]) + '\n';
+			
+			dialog.setContent(cnt + '</textarea></center>');
+			dialog.setVisible(true);
+		}
+	}
+	
+	
+	function showModels (qobdd, htmlTitle) {
+		var limit = 64, hardLimit = 1000; 
+		var reallyShow = true;
+		var type_vector = game.getAlad().getTypeVector();
+		var N = game.getAlad().getNumericTypeVector();
+		var view = new MDDView (qobdd, N);
+		
+		var m = view.countModels();
+		
+		if (m > hardLimit) {
+			window.alert ("There are too many models ("+m+").");
+			return;
+		}
+		
+		if (m > limit) {
+			reallyShow = window.confirm ("There are more than "+limit+" models. "
+					+"Show anyway?");
+		}
+		
+		if (reallyShow) {
+			var models = [];
+			
+			view.enumerateModels (game.getManager(), function (m) { models.push(m.slice(0)); });
+			
+			var rows = Math.min(20, m);
+			var cnt = '<center><textarea rows="'+rows+'" cols="100">';
+			
+			var dialog = new goog.ui.Dialog();
+			dialog.getTitleTextElement().innerHTML = htmlTitle;
+			
+			for (var i in models)
+				cnt += '(' + models[i] + ')\n';
+			
+			dialog.setContent(cnt + '</textarea></center>');
+			dialog.setVisible(true);
+		}
+	}
+	
+	
+	var showAlad = (function (){
+		var dialog;
+		
+		return function () {
+			if (undefined === dialog) {
+			    dialog = new goog.ui.Dialog();
+			    dialog.getTitleTextElement().innerHTML = 'Lattice of <i style="font-family: serif">N/&#8776;<sub>I</sub></i>';
+			    dialog.setContent ('<center><canvas id="aladCanvas" width="350" height="400"></canvas>'
+			    	+'<table width="100%"><tr><td><nobr><span class="keyboard-key">i</span>: Zoom in</nobr></td>'
+			    	+'   <td><nobr><span class="keyboard-key">o</span>: Zoom out</nobr></td>'
+			    	+'   <td><nobr><span class="keyboard-key">&#x2190;</span> and <span class="keyboard-key">&#x2192;</span>: Rotate left/right</nobr></td></tr></table>'
+			    	+'<form id="graphInputForm">'
+			    	+'   <input type=button value="Improve" onclick="startImprove()">'
+			    	+'   <input type=button value="Stop Improving" onclick="stopImprove()"><p></form><center>');
+			    dialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK);
+			   	/* Disable 'improve' whne the user closes the dialog. */    
+			  	goog.events.listen(dialog, goog.ui.Dialog.EventType.SELECT, function(e) {
+					stopImprove();
+			  	});
+			   	
+			  	dialog.setVisible(true);
+
+				bodyInit(); // DrawLattice.js
+			}
+			else {
+				dialog.setVisible(true);
+			}
+
+			myLoadAlad(game.getAlad());
+		};
+	}());
+
+	
+	function showSymmetryClasses () {
+		var classes = game.getAlad().getSymmetryClasses();
+		var msg = "Symmetry Classes:\n";
+		for (var i in classes) {
+			msg += "\t" + game.getNamedCoalStr(classes[i]) + "\n";
+		}
+		window.alert(msg);
+	}
+	
+	function showWeights () {
+		window.alert (game.getWeights());
+	}
+	
+	function showNotWeightedWitness () {
+		window.alert (game.getNotWeightedWitness() /* trade */);
+	}
+	
+	function showNotCompleteWitness () {
+		var witness = game.getNotCompleteWitness ();
+		window.alert ("Witness: i="+game.getPlayerName(witness[0])+", j="+game.getPlayerName(witness[1])+". "
+			+"S="+game.getNamedCoalStr(witness[2])+", T="+game.getNamedCoalStr(witness[3])
+				+" are winning, but S-i+j and S-j+i are losing.\n");
+	}
+	
+	function showNotProperWitness () {
+		var witness = game.getNotProperWitness();
+		var compl = game.getComplementCoal(witness);
+		window.alert ("Witness: " + game.getNamedCoalStr(witness) + " ("+ (game.isWinningCoal(witness)?"winning":"losing") +")"+
+				"\nComplement: " + game.getNamedCoalStr(compl) + " ("+ (game.isWinningCoal(compl)?"winning":"losing") +")\n");
+	}
+	
+	function showNotStrongWitness () {
+		var witness = game.getNotStrongWitness();
+		var compl = game.getComplementCoal(witness);
+		window.alert ("Witness: " + game.getNamedCoalStr(witness) + " ("+ (game.isWinningCoal(witness)?"winning":"losing") +")"+
+				"\nComplement: " + game.getNamedCoalStr(compl) + " ("+ (game.isWinningCoal(compl)?"winning":"losing") +")\n");
+	}
+
+	
+	function showHomogeneous () {
+		window.alert ("Natural Representation:\n"
+				+"\t" + game.getNaturalRepr() + "\n"
+				+"Sums:\n"
+				+"\t" + game.getNamedCoalStr(game.getSums())+"\n"
+				+"Steps:\n"
+				+"\t" + game.getNamedCoalStr(game.getSteps())+"\n"
+				+"Dummies:\n"
+				+"\t" + game.getNamedCoalStr(game.getDummyPlayers()));
+	}
+	
+	function showNonIncrOrder() {
+		var i,j;
+		
+		if ( game.isComplete()) {
+			var dialog = new goog.ui.Dialog();
+			dialog.setTitle ("Non-incr. Order of Players");
+			
+			var cnt = "<div>";
+			var order = game.getAlad().getNonIncrOrder();
+			var first = true;
+			for (i in order) {
+				if ( !first) {
+					if (game.getAlad().areSymmetric(order[i-1],order[i]))
+						cnt += '<div style="padding-left:20px">&#8776;<sub>I</sub> ';
+					else cnt += '<div style="padding-left:10px">&#8829;<sub>I</sub> ';
+				}
+				else first = false;
+				cnt += game.getPlayerName(order[i]) + "</div>";
+			}
+			
+			dialog.setContent (cnt);
+			dialog.setVisible(true);
+		}
+		else {
+			window.alert ("Sorry. The game is not complete.");
+		}
+	}
+	
+	var dialogGridAlad = undefined;
+	function showGridAlad () {
+		/* Show the relation instead. */
+		if ( !dialogGridAlad) {
+			var dialog = new goog.ui.Dialog ();
+			dialog.getTitleTextElement().innerHTML = '&#8829;<sub>I</sub> Relation';
+			dialog.setContent ('<div style="text-align:center">'
+					+'<canvas id="aladGridCanvas"></canvas>'
+					+'<p><span style="color:#a0a0a0; font-weight: bold;">Light Grey</span> means <i>symmetric</i>, '
+					+'<span style="color:#101010; font-weight: bold;">Dark Grey</span> means <i>more desirable as</i>.'
+					+'</p></div>');
+			dialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK);
+			dialogGridAlad = dialog;
+		}
+		var n = game.getPlayerCount();
+		var alad = game.getAlad();
+		var labels = game.getPlayerNames();
+		var bits = [];
+		for (i = 0 ; i < n ; ++i) {
+			bits[i] = [];
+			for (j = 0 ; j < n ; ++j) {
+				// 2 : symmetric, 1: more desir, 0: nothing
+				bits[i][j] = alad.areSymmetric(i,j) ? 2 : (alad.isMoreDesirable(i,j) ? 1 : 0);
+			}
+		}
+		var settings = {
+				cellColorFunc: function (val) { return (val === 2) ? '#a0a0a0' : ((val === 1) ? '#101010' : 'white'); },
+				gridLineWidth: 2
+			};
+
+		dialogGridAlad.setVisible (true); // realizes the canvas on the first call.
+		draw_grid (n, n, bits, document.getElementById('aladGridCanvas'), labels, labels, settings);
+	}
+	
+	function makeDirected () {
+		if ( !game.isComplete())
+			alert ("Unable to reorder. Game is not complete.");
+		else {
+			var inputElem = document.getElementById('input'); 
+			
+			/* Remove any '%place' command from the input. */
+			var input = inputElem.value.split('\n');
+			var output = [];
+			for (var i in input) {
+				if ( !/^%place\s/.test (input[i]))
+					output.push(input[i]);
+			}
+			
+			/* Add the placements for being directed. */
+			var order = game.getAlad().getNonIncrOrder();
+			for (var pos0 in order)
+				output.push('%place ' + (parseInt(pos0)+1) + ' #' + (order[pos0]+1));
+			
+			inputElem.value = output.join('\n');
+		}
+	}
+	
+	function addExampleGames () {
+		var sel = document.getElementById("examples");
+		
+		for (var id in example_games) {
+			var opt = document.createElement("option");
+			opt.text = example_games[id].name;
+			opt.value = id;
+			sel.options.add(opt)
+		}
+	}
+	
+	addExampleGames ();
+
+ 			function wvgManip(op) {
+ 				var game = parse_wvg(wvgInputElem.value);
+ 				game[op]();
+ 				wvgInputElem.value = game.toString();
+ 			}
+
+	
+	function saveWVG (str) {
+		var game = parse_wvg (str);
+		var name = prompt ("Name: ");
+		hist.store (game.toString(), name);
+	}
+	
+	var wvgDialog =  new goog.ui.Dialog();
+	
+	var comp = new goog.ui.Component (wvgDialog.getDomHelper());
+	comp.createDom = function () {
+		var thisObject = this;
+		
+		/*gobal*/ wvgInputElem = goog.dom.createDom('input', {
+			'type': 'text', 'id': 'wvgInput', 'size': '60', 'value': 'e.g. [8;6,4,3,1]'});
+		goog.events.listen (wvgInputElem, goog.events.EventType.CLICK, function() { 
+			if(/^e.g./.test(wvgInputElem.value)) wvgInputElem.value  = '';
+		});		
+		
+		var btnHalf =  goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['half of weights']);
+		goog.events.listen (btnHalf, goog.events.EventType.CLICK, function() { wvgManip('halfOfWeights'); });
+		
+		var btnShuffle = goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['shuffle']);
+		goog.events.listen (btnShuffle, goog.events.EventType.CLICK, function() { wvgManip('shuffle'); });
+		
+		var btnNonDecr = goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['non-decr. /']);
+		goog.events.listen (btnNonDecr, goog.events.EventType.CLICK, function() { wvgManip('nonDecreasing'); });
+		
+		var btnNonIncr = goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['non-incr. \\']);
+		goog.events.listen (btnNonIncr, goog.events.EventType.CLICK, function() { wvgManip('nonIncreasing'); });
+		
+		var btnReverse = goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['reverse']);
+		goog.events.listen (btnReverse, goog.events.EventType.CLICK, function() { wvgManip('reverse'); });
+		
+		var btnFormat = goog.dom.createDom('a', { 'class' : 'action', 'href': '#'}, ['format']);
+		goog.events.listen (btnFormat, goog.events.EventType.CLICK, function() { wvgInputElem.value=parse_wvg(wvgInputElem.value).toString(); });
+				
+		this.setElementInternal( this.dom_.createDom('div',undefined,
+			[this.dom_.createDom('center',undefined, [wvgInputElem]),
+		 	 this.dom_.createDom('nobr', undefined, 
+					[btnHalf,btnShuffle,btnNonDecr,btnNonIncr,btnReverse,btnFormat])
+			])); 
+		};
+	wvgDialog.addChild (comp, true);
+	
+ 	wvgDialog.setTitle('Enter a Weighted Voting Game');
+	wvgDialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK_CANCEL);
+	goog.events.listen(wvgDialog, goog.ui.Dialog.EventType.SELECT, function(e) {
+		if (e.key === 'ok') {
+			var wvg = parse_wvg(wvgInputElem.value);
+			var input = document.getElementById('input');
+			input.value = wvg.quota;
+			for (var i in wvg.weights)
+				input.value += "\n" + wvg.weights[i];
+		}
+	});
+	
+	function enterWVG () {
+		wvgDialog.setVisible(true);
+	}
+
+	
+	var enterOtherFormat = (function () {
+		var dialog;
+		var topTab;
+		
+        var tabs = { 
+				"min_win_coals" : {
+					"elementId" : "EnterMinWinCoalsTab",
+					"func" : function () {
+						document.getElementById('input').value = min_win_coals_to_mwvg(document.getElementById('minWinCoalsInput').value);
+					}
+        		},
+				"min_win_coal_vectors" : {
+					"elementId" : "EnterMinWinCoalVectorsTab",
+					"func" : function () {
+						document.getElementById('input').value =  min_win_coals_vectors_to_mwvg (document.getElementById('minWinCoalVectorsInput').value, '1', '0');
+					}
+        		}, 
+      		    "bool_expr" : {
+      		    	"elementId" : "EnterBoolExprTab",
+					"func" : function () {
+						document.getElementById('input').value = bool_expr_to_mwvg(document.getElementById('boolExprInput').value);
+					}
+      		    }};
+		
+		return function () {
+			if (undefined === dialog) {
+				dialog = new goog.ui.Dialog ();
+				dialog.setTitle ("Enter Other Format");
+				dialog.setContent (getUIElemById("EnterOtherFormatDialog").innerHTML);
+				
+				// NOTE: The tab can only be decorated after it is visible.
+				dialog.setVisible (true);
+				
+				topTab = new goog.ui.TabBar();
+			    topTab.decorate(document.getElementById("inputTopBar"));
+		    	
+		        goog.events.listen(topTab, goog.ui.Component.EventType.SELECT,
+		            function(e) {	        	
+		              var tabSelected = e.target;        
+
+		              var id = tabSelected.getContentElement().id;
+		              
+		              // Show the corresponding tab content and hide the contents of the others.
+		              for (var key in tabs) {
+		            	  var displayStyle = 'none';
+		            	  
+		            	  if (key === id) {
+		            		  displayStyle = "block";
+		            	  }
+		            	  
+		            	  document.getElementById(tabs[key].elementId).style.display = displayStyle;
+		              }
+		            });
+			  
+				
+				dialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK_CANCEL);
+				goog.events.listen(dialog, goog.ui.Dialog.EventType.SELECT, function(e) {
+					if (e.key === 'ok') {
+						var key = topTab.getSelectedTab().getContentElement().id;
+						try {
+							tabs[key].func ();
+						}
+						catch (e) {
+							alert ("Unable to parse input. Reason: "+e);
+						}
+					}
+				});
+			}
+			else dialog.setVisible (true);
+		}
+	}());
+
+	
+	var createAtRandom = (function (){
+		var dialog;
+		
+		function _create (form) {
+			document.getElementById('input').value 
+			= create_random_game (parseInt(form.m.value,10), parseInt(form.n.value,10), 
+				parseInt(form.w_i_min.value,10), parseInt(form.w_i_max.value,10), 
+				parseFloat(form.Q_factor.value,10), (form.weights_desc.checked ? true : false));
+		};
+		
+		function _load () { loadGame (document.getElementById('input').value); };
+		
+		return function (noDialog) {
+			if (undefined === dialog) {
+				/* We cannot access the parameters until the dialog has been
+				 * realized. */
+				noDialog = false;
+				
+				dialog = new goog.ui.Dialog();
+				dialog.setTitle ("Create a Random Game");
+				dialog.setContent (getUIElemById("EnterRandomGameDialog").innerHTML);
+				
+				var buttons = goog.ui.Dialog.ButtonSet.createOkCancel();
+				buttons.addButton ({ caption: "Create and Load", key : "create_and_load" });
+				dialog.setButtonSet(buttons);
+				goog.events.listen(dialog, goog.ui.Dialog.EventType.SELECT, function(e) {
+					if (e.key === 'ok' || e.key === "create_and_load") {
+						_create (document.RandomGame);
+						
+						if (e.key === "create_and_load") _load();
+					}
+				});
+			}
+			
+			if (noDialog === true) {
+				// Use the current settings.
+				_create (document.RandomGame);
+				_load ();
+			}
+			else dialog.setVisible(true);
+		};
+	}());
+
+	
+	/**
+	 * Creates the string representation of the random game.
+	 */
+	function create_random_game (m, n, wmin, wmax, Qfac, desc) {
+		 
+		var t /* iterates over games. */;
+		var i /* iterates over players. */;
+		 
+		var Q = [];
+		var w = [];
+		for (t = 0 ; t < m ; ++t) {
+			w[t] = [];
+			var sum = 0;
+			for (i = 0 ; i < n ; ++i) {
+				var omega = parseInt(Math.random() * (wmax - wmin)) + wmin;
+				w[t].push(omega);
+				sum += omega;
+			}
+			
+			if (desc === true) {
+				w[t].sort(function (a,b) { return b-a; });
+			}
+			
+			Q[t] = Math.ceil(sum * Qfac);
+		}
+		
+		var s = Q.join(" ") + '\n';
+		for (i = 0 ; i < n ; ++i) {
+			for (t = 0 ; t < m ; ++t) {
+				if (t > 0) s += ' ';
+				s += w[t][i];
+			}
+			if (i < 26)
+				s += ' ' + String.fromCharCode(65+i);
+			else 
+				s += ' ' + String.fromCharCode(65 + Math.floor(i/26)-1) + String.fromCharCode(65 + i % 26);
+			s += '\n'
+		}
+		
+		return s;
+	}
+	
+	</script>
+	
+	</form>
+
+	<script type="text/javascript">
+	
+	function showHelp () {
+		/* Center the window on the screen. */
+		var width = Config.help_window_width, 
+			height = Math.max(Config.help_window_min_height, 0.8*screen.height);
+		var left = parseInt((screen.width - width) / 2.0);
+		var top = parseInt((screen.height - height) / 2.0);
+		
+		window.open ("help.html", "Help", "width="+width+",height="+height+","
+				+"left="+left+",top="+top+","
+				+"resizable=yes,scrollbars=yes,"
+				+"menubar=no,location=no,dependent=yes");
+	}
+	
+	function saveInput () {
+		var name = window.prompt ("Please enter a name for the game: ", "");
+		if (!name || /^\s*$/.test(name))
+			return;
+		else {
+			hist.store (document.getElementById('input').value, name);
+		}
+	}
+	
+	function askShowLargeQOBDD (qobdd) {
+		var limit = Config.ask_show_qobdd_limit;
+		
+		if (qobdd.sizeAtMost(limit)) return true;
+		else {
+			return confirm ("The QOBDD you requested to render has >" + limit
+					+" inner nodes. During that process can become inoperable "
+					+"for some time. Besides, large QOBDDs tend to exhibit no "
+					+"useful information.\n\nAre you sure to display the QOBDD?");
+		}
+	}
+	 
+	function showWinQOBDD () {
+		var title = "QOBDD for &#x1d4e6;";
+		
+		if (game) {
+			var W = game.getWinQOBDD();
+			
+			if( !askShowLargeQOBDD(W))
+				return;
+			
+			if (true === game.isWeighted()) {
+				var V = W.collectNodes();
+				
+				/* Compute (lb,ub] for each node. */
+				W.computeBounds(game.getWeights());
+					
+				var dialog = showQOBDD (W, title);
+				
+				/* The HTML elements are realized when the dialog is shown. */
+				draw_qobdd (game.getPlayerCount(), game.getPlayerNames(), V, 
+						document.getElementById("qobddCanvas"), 1000, 600, true);
+			}
+			else showQOBDD (W, title);
+		}
+		
+		/* Let the user assign custom weights to the QOBDD even if they
+		 * do not belong to a weighted representation. */
+		document.getElementById('WinQOBDDOptions').style.display = 'block';
+	}
+
+	function updateWinQOBDDCustomWeights ()
+	{
+		/* If this function is called, the dialog for the display of the
+		 * QOBDD of the winning coalitions is visible.
+		 *
+		 * We don't have to ask the user again if the QOBDD is large. We
+		 * already did that before. */
+		 
+		var elem = document.getElementById("customWinQOBDDWeights");
+		var custom = parse_wvg(elem.value);
+		elem.value = custom.toString();
+				
+		var W = game.getWinQOBDD();
+		var V = W.collectNodes();
+		
+		/* Compute (lb,ub] for each node. */
+		W.computeBounds(custom.weights);
+		
+		draw_qobdd (game.getPlayerCount(), game.getPlayerNames(), V, 
+				document.getElementById("qobddCanvas"), 1000, 600, true);
+	}
+	
+	/**
+	 * Show a dialog with a QOBDD.
+	 */
+	var showQOBDD = (function(){
+		var dialog;
+		
+		return function (qobdd, titleHtml, drawValues, drawValueFunc) {
+			if (undefined === dialog) {
+			    dialog = new goog.ui.Dialog();
+			    dialog.setTitle ("");
+			    dialog.setContent('<center><canvas id="qobddCanvas"></canvas></center>'
+			    		+'<div id="WinQOBDDOptions" style="display:none">'
+			    		+'  <b>Custom Weights </b> <i>[Q;w<sub>1</sub>,...,w<sub>n</sub>]</i> <small>(<i>Q</i> is ignored)</small>:<br/><input type="text" size="30" id="customWinQOBDDWeights" /> '
+			    		+'  <input type="button" onClick="updateWinQOBDDCustomWeights()" value="Update">'
+			    		+'</div>');
+			    dialog.setButtonSet(goog.ui.Dialog.ButtonSet.OK);
+			}
+			
+			if (game) {
+				if( !askShowLargeQOBDD(qobdd))
+					return;
+				
+				var n = qobdd.getVarCount();
+				var V = qobdd.collectNodes();
+			
+				var save_value    = function (u) { u._value = u.value; };
+				var restore_value = function (u) { u.value = u._value; };
+				
+				/* After that call, the value property of each inner node v corresponds
+				 * to #set(v). */
+				save_value(QOBDD.one);
+				save_value(QOBDD.zero);
+				QOBDD.one.value  = 1;
+				QOBDD.zero.value = 0;
+				qobdd.traverseInner (function(u) {
+					save_value(u);
+					u.value = u.t.value + u.e.value; return true; 
+				});
+				
+				for (var i = n-1 ; i >= 1 ; --i) {		
+					/* If the nodes are totally ordered w.r.t to strict set inclusion
+					 * that order is the same as if we ordered the nodes by they 
+					 * #set(v) values. */
+					V[i].sort(function(u,v){ return v.value - u.value; });
+				}
+				
+				restore_value(QOBDD.one);
+				restore_value(QOBDD.zero);
+				qobdd.traverseInner (function(u) { restore_value(u); return true; });
+				
+				dialog.getTitleTextElement().innerHTML = titleHtml;
+				dialog.setVisible(true);
+				draw_qobdd (n, game.getPlayerNames(), V, 
+					document.getElementById("qobddCanvas"), 1000, 600, false, 
+						drawValues, drawValueFunc);
+				
+				/* Hide options which are only avaible if a QOBDD for the winning
+				 * coalitions is displayed. */
+				document.getElementById('WinQOBDDOptions').style.display = 'none';
+				
+				return dialog;
+			}
+		};
+	}());
+	
+	
+	function abbrevName (name, maxLen) {
+	    /* Add ellipsis if necessary */
+	    if (name.length > maxLen) return name.substr(0,maxLen-3) + "...";
+	    else return name;
+	}
+
+	
+	function showPie (canvasName, game, methodName) {
+		var data = game[methodName]();
+		var names = game.getPlayerNames();
+	    var n = game.getPlayerCount();
+	    var labels = [];
+		for (var i = 0 ; i < n ; ++i)
+	    	 labels.push(abbrevName(names[i],Config.pie_max_label_length)+" ("+(new Number(data[i]*100.0)).toFixed(1)+"%)");
+		
+		var canvas = document.getElementById(canvasName);
+	     canvas.width = canvas.width;
+	     
+	     var pie = new RGraph.Pie(canvasName, data);
+	     pie.Set('chart.labels', labels);
+	     pie.Set('chart.colors', Config.pie_colors);
+	     pie.Set('chart.linewidth', 1);
+	     pie.Set('chart.stroke', '#fff');
+	     pie.Set('chart.shadow', true);
+	     pie.Draw();
+	}
+	
+	function showBanzhaf()       { showPie ('canvasBanzhaf', game, 'getNormBanzhaf'); }
+	function showShapleyShubik() { showPie ('canvasShapleyShubik', game, 'getShapleyShubik'); }
+	function showHollerPackel()  { showPie ('canvasHollerPackel', game, 'getNormHollerPackel'); }
+	function showDeeganPackel()  { showPie ('canvasDeeganPackel', game, 'getDeeganPackel'); }
+	function showShiftPower()    { showPie ('canvasShiftPower', game, 'getShiftPower'); }
+	
+
+	var solver; // \ref Solver object. Interface to the backend.
+    
+	function solveGame () {
+		document.getElementById("SolverResult").style.display = "none";
+		var input = document.getElementById('input').value;
+		
+		/* Gather the options for the solver an call it. */
+		var elems = document['SolverForm'].elements;
+		var form = document.SolverForm;
+		var opts = { };
+		
+		opts.action        = form.solver_action.options[form.solver_action.selectedIndex].value;
+		opts.integer       = form.integer.checked ? 'true' : 'false';
+		opts.objective     = form.objective.options[form.objective.selectedIndex].value;
+		opts.preserveTypes = form.preserveTypes.checked ? 'true' : 'false';
+		
+		if (opts.action === 'solve')
+			document.getElementById("SolverWait").style.display = "block";
+		
+		var _onSolved = function (result) {
+			document.getElementById("SolverWait").style.display = "none"; 
+			document.getElementById("SolverResult").style.display = "block";
+		    var html = '';
+		     
+	     	html = '<div style="text-align:center">Game is weighted: <i>[Q; ';
+	     	var w = [];
+	     	for (var i = 0 ; i < game.getPlayerCount() ; ++i)
+	     		w.push(result['w'+i]);
+	     	html += w.join(", ") + ']';
+	     	html += '</i><br/> and ' + result['l_root'] + '< Q <=' + result['u_root'];
+	     	html += '</div>';
+		    html += '<br/> Time needed: ' + result['time'] + ' s';
+		     
+		    document.getElementById("SolverResult").innerHTML = html;
+		};
+		
+		var _onUnsolvable = function (result) {
+			document.getElementById("SolverWait").style.display = "none"; 
+		    document.getElementById("SolverResult").style.display = "block";
+		    var html = '';
+		    html = '<div style="text-align:center; font-style: italic">Not weighted.</div>';
+		    html += '<br/> Time needed: ' + result['time'] + ' s';
+		     
+		    document.getElementById("SolverResult").innerHTML = html;
+		}
+		
+		solver.request (input, opts, _onSolved, _onUnsolvable);
+	}
+	
+	
+	function verifyFWVGSolverForm (formElem) {
+		try {
+			var f = new Formula ({ createEncoder : function () { return new DefaultBinaryEncoder(); } },
+					formElem.formula.value);
+		}
+		catch (e) {
+			alert ("Invalid Formula. Reason: " + e);
+			return false;
+		}
+		return true;
+	}
+	
+	
+	var showFWVGModelService = (function (){
+		var dialog;
+		
+		return function () {
+			if (undefined === dialog) {
+				dialog = new goog.ui.Dialog();
+				dialog.getTitleTextElement().innerHTML = "Download a &phi;-WVG Model"
+				dialog.setContent (document.getElementById('FWVGModelServiceDialogContent').innerHTML);
+				dialog.setButtonSet(goog.ui.Dialog.ButtonSet.CANCEL);
+			}
+			
+			if ( !game.isConsecutive()) {
+				window.alert ("The game has to be consecutive for this.");
+			}
+			else { 
+				dialog.setVisible (true);
+			}
+		};
+	}());
+	
+	
+	var showLinearProgram = (function (){
+		var dialog;
+		
+		return function () {
+			if (solver === undefined) {
+				try {
+					solver = new Solver (Config.solver_url);
+					dialog = new goog.ui.Dialog();
+					dialog.setTitle("Find a weighted representation");
+					dialog.setContent (getUIElemById('WVGModelServiceDialogContent').innerHTML);
+					dialog.setButtonSet(goog.ui.Dialog.ButtonSet.CANCEL);
+
+					/* The HTML elements are created AFTER the dialog has been
+					 * set visible. */
+					dialog.setVisible (true);
+					
+					document.getElementById("WVGModelService_SolverName").innerHTML = solver.getSolverName();
+				}
+				catch (e) {
+					alert ("Sorry! The solver at "+Config.solver_url+" seems to be offline or unavailable. Reason: "
+							+"\"" + e + "\" "
+							+"The linear program is displayed in a new window instead.");
+				}
+			}
+			
+			if (solver && solver.isOnline()) {
+				dialog.setVisible (true);
+				document.getElementById("SolverResult").style.display = "none";
+				document.getElementById("SolverWait").style.display = "none";
+			}
+			else {
+				var service = new WVGModelService (game);
+				var model = service.getModel();
+				/* Use default settings for the Linear Programming Model */
+				var buf = '';
+				var builder = new CPLEX_LPBuilder (function (s) { buf += s+'\n'; });
+				model.build (builder);
+				
+				var lpwnd = window.open ("", "lp", "scrollbars=yes");
+				lpwnd.document.open();
+				lpwnd.document.write ('<html><head><link rel="stylesheet" href="css/main.css"></link></head><body>'
+						+'Copy the following linear program in <a href="http://lpsolve.sourceforge.net/5.5/CPLEX-format.htm" class="external">CPLEX file format</a> to a file '
+						+'and use, for instance, <tt><a href="http://www.gnu.org/software/glpk/" class="external">glpsol --lp &lt;file></a></tt> '
+						+'or <tt><a href="http://lpsolve.sourceforge.net/" class="external">lp_solve -rxli xli_CPLEX &lt;file></a></tt> to solve it:<br/>' 
+						+'<pre style="margin-left:20px;">\n'+buf+'\n</pre></body></html>');
+				lpwnd.document.close();
+			}
+		};
+	}()); 	
+
+
+	</script>
+	
+	<!-- Load the UI elements. -->
+	<iframe id="UIFrame" src="ui.html" width="0" height="0"></iframe>
+	
+	<script type="text/javascript">
+		function getUIElemById (id) {
+			return document.getElementById("UIFrame").contentDocument.getElementById(id);
+		}
+	</script>
+</body>
+</html>

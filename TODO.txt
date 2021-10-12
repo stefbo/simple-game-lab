@@ -1,0 +1,5 @@
+ * Integrate FWVG models into the user interface. Update help pages.
+ * Add manifest to use the lab online.
+ * Compile .js files in production environment.
+ *  (- Counterexample for homogeneity.)
+ *  (- k-trade robustness.)
